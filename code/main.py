@@ -1,9 +1,12 @@
 import csv
 import json
+import matplotlib.pyplot as plt
 
 
 DATA_SOURCE = 'data/DSL-StrongPasswordData.csv'
 DATA_JSON = 'data/password_data.json'
+x=[]
+y=[]
 
 
 def make_json():
@@ -58,8 +61,41 @@ def test():
     train, test_user, test_imposter = load_datasets(subjects[0], data)
     
 
+def signature_graph():
+    with open('data/individual-user-datum/s002.csv', 'r') as data:
+        plots= csv.reader(data, delimiter=',')
+        is_title_row = True
+        row_count = 0
+        for row in plots:
+
+            # Row is just column names
+            if(is_title_row):
+                print(row)
+                title_list = row
+                is_title_row = False
+                row_count += 1
+                print("\n\nActual data:")
+            else:
+                #plt.scatter(row[2:], row_count)
+                print(row[3:]) # Cut off first 3 columns
+                row_count += 1
+            # print(row[0] + " " + row[1])
+            # x.append(int(row[0]))
+            
+            # y.append(int(row[1]))
+            # print(y)
+    
+   
+    # plt.plot(x,y, marker='o')
+
+    # plt.title('s002 Typing Signature')
+
+    # plt.xlabel('Number of People')
+    # plt.ylabel('Expenses')
+
+    # plt.show()
 
 
 
 if __name__ == '__main__':
-    test()
+    signature_graph()
