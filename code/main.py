@@ -62,10 +62,14 @@ def test():
     
 
 def signature_graph():
+
     with open('data/individual-user-datum/s002.csv', 'r') as data:
         plots= csv.reader(data, delimiter=',')
         is_title_row = True
         row_count = 0
+        data_list = []
+        y_axis = []
+
         for row in plots:
 
             # Row is just column names
@@ -76,15 +80,16 @@ def signature_graph():
                 row_count += 1
                 print("\n\nActual data:")
             else:
-                #plt.scatter(row[2:], row_count)
-                print(row[3:]) # Cut off first 3 columns
+                data_list.append(row[3:])
                 row_count += 1
-            # print(row[0] + " " + row[1])
-            # x.append(int(row[0]))
+           
+        
+        for i in range(len(title_list)):
+            print(data_list[i])
+            for j in range(len(data_list[0])):
+                z = 0 # Debug val
+
             
-            # y.append(int(row[1]))
-            # print(y)
-    
    
     # plt.plot(x,y, marker='o')
 
