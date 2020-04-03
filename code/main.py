@@ -1,5 +1,6 @@
 import csv
 import json
+import numpy as np
 
 
 DATA_SOURCE = 'data/DSL-StrongPasswordData.csv'
@@ -28,8 +29,8 @@ def load_datasets(subject, data):
         train: first 200 repititions of user
         test_user: last 200 repititions of user
     ''' 
-    train = data[subject][:200]
-    test_user = data[subject][200:]
+    train = data[subject][:350]
+    test_user = data[subject][350:]
     test_imposter = []
     for s in data:
         if s != subject:
@@ -64,13 +65,38 @@ def test():
     with open(DATA_JSON) as json_file:
         data = json.load(json_file)
 
-    subjects = data.keys()
-
-    train, test_user, test_imposter = load_datasets(subjects[0], data)
+    subjects = list(data.keys())
+    train, test, test_imposter = load_datasets(subjects[0], data)
+    # train = train[:20] + test_imposter[:40] + train[20:60] + test_imposter[40:50]
+    test_imposter = np.array(test_imposter)
+    train = np.array(train)
+    test = np.array(test)
+    print(test_imposter.shape)
+    return train,test,test_imposter
+    
     
 
+def getData():
+    with open(DATA_JSON) as json_file:
+        data = json.load(json_file)
 
-
+    subjects = list(data.keys())
+    train, test, test_imposter = load_datasets(subjects[0], data)
+    X = np.array(train + test_imposter)
+    y = list()
+    z = np.array(test)
+    # for i in range(len(train) + len(test) + len(test_imposter)):
+    #     if(i < 400):
+    #         y.append(1.0)
+    #     else: 
+    #         y.append(0.0)
+    for i in range(len(train) + len(test_imposter)):
+        if(i < 350):
+            y.append(1.0)
+        else: 
+            y.append(0.0)
+    return X,y,z
 
 if __name__ == '__main__':
+
     test()
