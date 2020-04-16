@@ -1,0 +1,22 @@
+////////////////////////////////////////
+/// Merge side-branch into master: 
+////////////////////////////////////////
+
+1) Go to master: git merge <side-branch>
+2) Now do git add, commit, push
+
+////////////////////////////////////////
+/// Merge master into side-branch:
+////////////////////////////////////////
+
+1) Go to master, pull changes
+2) Checkout to side-branch, now merge: git merge origin/master
+3) Push side-branch: git push origin <side-branch>
+
+///////////////////////////////////////
+/// How to push to a branch
+///////////////////////////////////////
+
+1) git add .
+2) git commit -m "Enter a commit message"
+3) git push
