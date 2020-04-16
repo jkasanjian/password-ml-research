@@ -42,7 +42,30 @@ def load_datasets(subject, data):
     test_user = convert_to_float(test_user)
     test_imposter = convert_to_float(test_imposter)
 
-    return train, test_user, test_imposter    
+    x_train = train
+    y_train = [1 for i in range(len(x_train))]
+    x_test = test_user + test_imposter
+    y_test = [1 for i in range(len(test_user))] + [-1 for i in range(len(test_imposter))]
+
+    x_train, y_train = shuffle(x_train, y_train)
+    x_test, y_test = shuffle(x_test, y_test)
+
+    return np.array(x_train), np.array(y_train), np.array(x_test), np.array(y_test)  
+
+
+def shuffle(x, y):
+    for i in range(5 * len(x)):
+        i_1 = np.random.randint(0, len(x))
+        i_2 = np.random.randint(0, len(x))
+        temp_x = x[i_1]
+        x[i_1] = x[i_2]
+        x[i_2] = temp_x
+        temp_y = y[i_1]
+        y[i_1] = y[i_2]
+        y[i_2] = temp_y
+    
+    return x, y
+
 
 
 def convert_to_float(rows):
@@ -83,15 +106,17 @@ def test():
     with open(DATA_JSON) as json_file:
         data = json.load(json_file)
 
+    del data['subject']
     subjects = data.keys()
 
-    train, test_user, test_imposter = load_datasets(subjects[0], data)
+    x_train, y_train, x_test, y_test = load_datasets(subjects[0], data)
+
     
 
 
 
 
 if __name__ == '__main__':
-    signature_graph()
+    test()
 
 
