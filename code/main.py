@@ -1,6 +1,8 @@
 import csv
 import json
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 
 
 DATA_SOURCE = 'data/DSL-StrongPasswordData.csv'
@@ -62,38 +64,30 @@ def test():
     
 
 def signature_graph():
-    with open('data/individual-user-datum/s002.csv', 'r') as data:
-        plots= csv.reader(data, delimiter=',')
-        is_title_row = True
-        row_count = 0
-        for row in plots:
 
-            # Row is just column names
-            if(is_title_row):
-                print(row)
-                title_list = row
-                is_title_row = False
-                row_count += 1
-                print("\n\nActual data:")
-            else:
-                #plt.scatter(row[2:], row_count)
-                print(row[3:]) # Cut off first 3 columns
-                row_count += 1
-            # print(row[0] + " " + row[1])
-            # x.append(int(row[0]))
-            
-            # y.append(int(row[1]))
-            # print(y)
+    #x,y = np.loadtxt('data/individual-user-datum/s002.csv', unpack = True, delimiter = ',')
+    my_data = np.genfromtxt('data/individual-user-datum/s002.csv', delimiter=',')
+    print(my_data)
     
-   
-    # plt.plot(x,y, marker='o')
+    #plt.plot(x,y)
+    #plt.show()
+    
+    # with open('data/individual-user-datum/s002.csv', 'r') as data:
+    #     plots= csv.reader(data, delimiter=',')
+    #     is_title_row = True
+    #     row_count = 0
+    #     for row in plots:
 
-    # plt.title('s002 Typing Signature')
-
-    # plt.xlabel('Number of People')
-    # plt.ylabel('Expenses')
-
-    # plt.show()
+    #         # Row is just column names
+    #         if(is_title_row):
+    #             print(row)
+    #             title_list = row
+    #             is_title_row = False
+    #             row_count += 1
+    #             print("\n\nActual data:")
+    #         else:
+    #             print(row[3:]) # Cut off first 3 columns
+    #             row_count += 1
 
 
 
