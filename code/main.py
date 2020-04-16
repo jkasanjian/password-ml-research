@@ -54,6 +54,17 @@ def convert_to_float(rows):
 
 
 
+def visualize_data():
+    ''' Creates visualization of each subject ''' 
+    with open(DATA_JSON) as json_file:
+        data = json.load(json_file)
+
+    for subject in data:    
+        pass    # subject is the string key, data[subject] is list of trial rows (400 each)
+
+
+
+
 def test():
     with open(DATA_JSON) as json_file:
         data = json.load(json_file)
