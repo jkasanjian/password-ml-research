@@ -11,14 +11,17 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 
 
-
+# DIRECTORIES
 DATA_SOURCE = 'data/DSL-StrongPasswordData.csv'
 DATA_JSON = 'data/password_data.json'
 DATA_SPLIT_SK = 'data/split/sklearn/'
 MODELS_LOGIT = 'models/logistic/'
 MODELS_KNN = 'models/knn/'
 USER_GRAPHS = 'data/graphs/'
-RESULTS = 'results/'
+RESULTS_ALONE = 'results/alone/'
+RESULTS_COMBO = 'results/combo/'
+
+
 
 
 def read_data():
@@ -170,6 +173,72 @@ def load_data_sklearn(s):
     
 
 
+def load_models(s):
+    ''' Returns all models for a given subject s
+        ADD NEW MODELS HERE TO RETURN STATEMENT '''
+    knn_clf = load(MODELS_KNN + s + '.joblib') 
+    log_clf = load(MODELS_LOGIT + s + '.joblib')
+
+    return knn_clf, log_clf
+
+
+
+def test_models_alone():
+    ''' Calculates the miss/false alarm rates for each model individually'''
+    _, subjects = read_data()
+   
+    knn_results = {}
+    knn_results['miss rate'] = []
+    knn_results['false alarm rate'] = []
+
+    log_results = {}
+    log_results['miss rate'] = []
+    log_results['false alarm rate'] = []
+
+    for s in subjects:
+
+        knn_clf, log_clf = load_models(s)   # ADD NEW MODELS HERE
+
+        _, x_test, _, y_test = load_data_sklearn(s)
+        n = len(y_test)
+
+        knn_pred = knn_clf.predict(x_test)
+        miss_knn = 0
+        f_alarm_knn = 0
+
+        log_pred = log_clf.predict(x_test)
+        miss_log = 0
+        f_alarm_log = 0
+
+        for i in range(n):
+
+            if knn_pred[i] == 1.0 and y_test[i] == -1.0:
+                miss_knn += 1
+            elif knn_pred[i] == -1.0 and y_test[i] == 1.0:
+                f_alarm_knn += 1
+
+            if log_pred[i] == 1.0 and y_test[i] == -1.0:
+                miss_log += 1
+            elif log_pred[i] == -1.0 and y_test[i] == 1.0:
+                f_alarm_log += 1
+
+        knn_results['miss rate'].append(miss_knn/n)
+        knn_results['false alarm rate'].append(f_alarm_knn/n)
+
+        log_results['miss rate'].append(miss_log/n)
+        log_results['false alarm rate'].append(f_alarm_log/n)
+
+    print('KNN Average miss rate:', sum(knn_results['miss rate'])/len(subjects))
+    print('KNN Average false alarm rate:', sum(knn_results['false alarm rate'])/len(subjects))
+
+    print('Logistic Average miss rate:', sum(log_results['miss rate'])/len(subjects))
+    print('Logistic Average false alarm rate:', sum(log_results['false alarm rate'])/len(subjects))
+        
+
+
+
+
+
 def knn_classifier():
     ''' Generates a KNN model for each subject, stored in models/knn/ folder'''
     _, subjects = read_data()
@@ -256,7 +325,6 @@ def test_logistic_regression():
 
 
 if __name__ == '__main__':
-    # test_knn()
-    # test_logistic_regression()
-    knn_classifier()
-    log_reg_classifier()
+    # knn_classifier()
+    # log_reg_classifier()
+    test_models_alone()
