@@ -4,9 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import operator
 
-from sklearn import preprocessing, neighbors
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
-from sklearn.neighbors import DistanceMetric
 
 
 
@@ -168,7 +168,7 @@ def test_knn():
     print('all data:',x.shape)
     print('train data:',x_train.shape)
     print('test data:',x_test.shape)
-    clf = neighbors.KNeighborsClassifier(algorithm='brute',
+    clf = KNeighborsClassifier(algorithm='brute',
                                          metric='mahalanobis',
                                          metric_params={'V': np.cov(x_train)},
                                          n_neighbors=n)
@@ -183,7 +183,7 @@ def test_knn():
     Training with mixed datam 0.6-0.8 accuracy (shown below)
 
     x_train, y_train, x_test, y_test = load_datasets_mix(subjects[8], data)
-    clf = neighbors.KNeighborsClassifier(algorithm='brute',
+    clf = KNeighborsClassifier(algorithm='brute',
                                          metric='mahalanobis',
                                          metric_params={'V': np.cov(x_train)},
                                          n_neighbors=n)
@@ -191,6 +191,26 @@ def test_knn():
     accuracy = clf.score(x_test, y_test)
     print('Accuracy (pos data):',accuracy)
     '''
+
+
+def test_logistic_regression():
+    data, subjects = read_data()
+    x, y = load_all_data(subjects[6], data)
+
+    #x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.02, train_size=.02)
+    # again, more accurate with automatic splitting
+    x_train, y_train, x_test, y_test = load_datasets_mix(subjects[0], data)
+    print('all data:',x.shape)
+    print('train data:',x_train.shape)
+    print('test data:',x_test.shape)
+
+    print('first x', x_train[0])
+    print('first y', y_train[0])
+
+    clf = LogisticRegression()
+    clf.fit(x_train, y_train)
+    accuracy = clf.score(x_test, y_test)
+    print('Accuracy:',accuracy)
 
 
 
@@ -204,10 +224,10 @@ def KNN_classifier():
     for s in subjects:
         x, y = load_all_data(s, data)
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.02, train_size=0.02)    
-        clf = neighbors.KNeighborsClassifier(algorithm='brute',
-                                        metric='mahalanobis',
-                                        metric_params={'V': np.cov(x_train)},
-                                        n_neighbors=k)
+        clf = KNeighborsClassifier(algorithm='brute',
+                                   metric='mahalanobis',
+                                   metric_params={'V': np.cov(x_train)},
+                                   n_neighbors=k)
         clf.fit(x_train, y_train)
         accuracy = clf.score(x_test, y_test)
         results[s] = accuracy
@@ -215,10 +235,31 @@ def KNN_classifier():
     with open(RESULTS + 'KNN_automatic_split', 'w') as fp:
         json.dump(results, fp)
 
-    print(results)
+
+
+def log_reg_classifier():
+    
+    data, subjects = read_data()
+    results = {}
+
+    for s in subjects:
+        x, y = load_all_data(s, data)
+        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.02, train_size=0.02)    
+        clf = LogisticRegression()
+        clf.fit(x_train, y_train)
+        accuracy = clf.score(x_test, y_test)
+        results[s] = accuracy
+
+    with open(RESULTS + 'Logistic_automatic_split', 'w') as fp:
+        json.dump(results, fp)
+
+
+
 
 
 if __name__ == '__main__':
-    KNN_classifier()
+    # KNN_classifier()
+    # log_reg_classifier()
+    test_logistic_regression()
 
-
+    pass
