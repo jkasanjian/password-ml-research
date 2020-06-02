@@ -3,7 +3,7 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 import operator
-from os import mkdir
+from os import mkdir, remove
 from joblib import dump, load
 from scipy.stats import mode
 from sklearn.neighbors import KNeighborsClassifier, NearestNeighbors
@@ -240,7 +240,7 @@ def random_forest_classifier():
                                     max_features='sqrt', max_depth=90, bootstrap=False)
         clf.fit(x_train, y_train)
         dump(clf, MODELS_RF + s + '.joblib')
-        visualize_tree(clf, s)
+        #visualize_tree(clf, s)
 
 
 def visualize_tree(clf, s):
@@ -255,6 +255,7 @@ def visualize_tree(clf, s):
 
     check_call(['dot', '-Tpng', TREE_GRAPHS+s+'tree.dot', '-o', TREE_GRAPHS+s+'tree.png', '-Gdpi=600'])
     Image(filename=TREE_GRAPHS+s+'tree.png')
+    remove(TREE_GRAPHS+s+'tree.dot')
 
 
 def random_forest_classifier_tuning():
