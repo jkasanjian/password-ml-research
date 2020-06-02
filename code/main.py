@@ -8,19 +8,26 @@ from joblib import dump, load
 from scipy.stats import mode
 from sklearn.neighbors import KNeighborsClassifier, NearestNeighbors
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import train_test_split, RandomizedSearchCV
+from IPython.display import Image
+from sklearn.tree import export_graphviz
+from subprocess import check_call
 
 
 # DIRECTORIES
 DATA_SOURCE = 'data/DSL-StrongPasswordData.csv'
 DATA_JSON = 'data/password_data.json'
 DATA_SPLIT_SK = 'data/split/sklearn/'
+
 MODELS_LOGIT = 'models/logistic/'
 MODELS_KNN = 'models/knn/'
+MODELS_RF = 'models/randfor/'
+
 USER_GRAPHS = 'data/graphs/'
+TREE_GRAPHS = 'data/trees/'
 RESULTS_ALONE = 'results/alone/'
 RESULTS_COMBO = 'results/combo/'
-
 
 
 
@@ -32,6 +39,12 @@ def read_data():
     subjects = list(data.keys())
     
     return data, subjects
+
+def get_features():
+    with open(DATA_JSON) as json_file:
+        data = json.load(json_file)
+
+    return data['subject'][0]
 
 
 def make_json():
@@ -75,58 +88,6 @@ def create_signature_graphs():
         f_name = USER_GRAPHS + subject
         plt.savefig(f_name)
         plt.close()
-
-
-
-def load_datasets_pos(subject, data):
-    ''' Loads train and test datasets for a given subject 
-        using only POSITIVE data for train
-        train: first 200 repititions of user
-        test_user: last 200 repititions of user
-    ''' 
-    train_user = data[subject][:200]
-    test_user = data[subject][200:]
-    test_imposter = []
-    for s in data:
-        if s != subject:
-            test_imposter.extend(data[s][:5])
-
-    x_train = train_user
-    y_train = [1 for i in range(len(x_train))]
-    x_test = test_user + test_imposter
-    y_test = [1 for i in range(len(test_user))] + [-1 for i in range(len(test_imposter))]
-
-    # x_train, y_train = shuffle(x_train, y_train)
-    # x_test, y_test = shuffle(x_test, y_test)
-
-    return (np.array(x_train).astype(np.float64), np.array(y_train).astype(np.float64), 
-    np.array(x_test).astype(np.float64), np.array(y_test).astype(np.float64)) 
-
-
-
-def load_datasets_mix(subject, data):
-    ''' Loads train and test datasets for a given subject 
-        using POSITIVE AND NEGATIVE data for user
-        train: first 200 repititions of user, last 5 from each imposter
-        test_user: last 200 repititions of user, first 5 from each imposter
-    ''' 
-    train_user = data[subject][:200]
-    train_imposter = []
-    test_user = data[subject][200:]
-    test_imposter = []
-    for s in data:
-        if s != subject:
-            train_imposter.extend(data[s][-5:])
-            test_imposter.extend(data[s][:5])
-
-    x_train = train_user + train_imposter
-    y_train = [1 for i in range(len(train_user))] + [-1 for i in range(len(train_imposter))]
-    x_test = test_user + test_imposter
-    y_test = [1 for i in range(len(test_user))] + [-1 for i in range(len(test_imposter))]
-    # x_train, y_train = shuffle(x_train, y_train)
-    # x_test, y_test = shuffle(x_test, y_test)
-    return (np.array(x_train).astype(np.float64), np.array(y_train).astype(np.float64), 
-    np.array(x_test).astype(np.float64), np.array(y_test).astype(np.float64))
 
 
 
@@ -257,7 +218,7 @@ def knn_classifier():
 
 def log_reg_classifier():
     ''' Generates a Logistic regression model for each subject, 
-        stored in models/logistic/ folder'''
+        stored in models/logistic/ folder '''
     _, subjects = read_data()
 
     for s in subjects:
@@ -268,18 +229,71 @@ def log_reg_classifier():
         dump(clf, MODELS_LOGIT + s + '.joblib')
 
 
+def random_forest_classifier():
+    ''' Generates a Random Forest classifier model for each 
+        subject stored in models/rfc/ folder '''
+    _, subjects = read_data()
+    
+    for s in subjects:
+        x_train, _, y_train, _ = load_data_sklearn(s)
+        clf = RandomForestRegressor(n_estimators=800, min_samples_split=5, min_samples_leaf=1, 
+                                    max_features='sqrt', max_depth=90, bootstrap=False)
+        clf.fit(x_train, y_train)
+        dump(clf, MODELS_RF + s + '.joblib')
+        visualize_tree(clf, s)
 
 
-'''
-# --------------------TESTING BELOW--------------------
+def visualize_tree(clf, s):
+    ''' Creates a graphics diagram of a tree from the random forest '''
+    estimator = clf.estimators_[5]
 
-def test_knn():
+    export_graphviz(estimator, out_file=TREE_GRAPHS+s+'tree.dot', 
+                feature_names = get_features(),
+                class_names = ['genuine user', 'imposter'],
+                rounded = True, proportion = False, 
+                precision = 2, filled = True)
+
+    check_call(['dot', '-Tpng', TREE_GRAPHS+s+'tree.dot', '-o', TREE_GRAPHS+s+'tree.png', '-Gdpi=600'])
+    Image(filename=TREE_GRAPHS+s+'tree.png')
+
+
+def random_forest_classifier_tuning():
+    ''' Generates a Random Forest regression model for each subject'''
+    _, subjects = read_data()
+    x_train, _, y_train, _ = load_data_sklearn(subjects[0]) 
+
+    n_estimators = [int(x) for x in np.linspace(start=200, stop=2000, num=10)]
+    max_features = ['auto', 'sqrt']
+    max_depth = [int(x) for x in np.linspace(10, 110, num = 11)]
+    max_depth.append(None)
+    min_samples_split = [2, 5, 10]
+    min_samples_leaf = [1, 2, 4]
+    bootstrap = [True, False]
+    # Create the random grid
+    random_grid = {'n_estimators': n_estimators,
+               'max_features': max_features,
+               'max_depth': max_depth,
+               'min_samples_split': min_samples_split,
+               'min_samples_leaf': min_samples_leaf,
+               'bootstrap': bootstrap}
+
+    rf = RandomForestRegressor()
+    rf_random = RandomizedSearchCV(estimator=rf, param_distributions=random_grid, 
+                                   n_iter=100, cv=3, verbose=2, random_state=42, n_jobs= 1)
+    rf_random.fit(x_train, y_train)
+
+    print('\n\nBEST: ', rf_random.best_params_)
+    # {'n_estimators': 800, 'min_samples_split': 5, 'min_samples_leaf': 1, 'max_features': 'sqrt', 'max_depth': 90, 'bootstrap': False}
+    # Improved accuracy from 87% default to 90% with best
+
+
+
+def knn_tuning():
     data, subjects = read_data()
     
     all_results = []
     accs = []
     for i in range(50):
-        
         acc = {}
         for k in range(1, 5):
             
@@ -298,27 +312,8 @@ def test_knn():
         all_results.append(best_k)
             
     print(mode(all_results))
-    print(sum(accs)/len(accs))
-    # CALCULATED K = 2 yields highest accuracy
+    # CALCULATED k = 2 yields highest accuracy
 
-
-def test_logistic_regression():
-    data, subjects = read_data()
-    x, y = load_all_data(subjects[8], data)
-
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.5, train_size=0.5)
-    # x_train, y_train, x_test, y_test = load_datasets_mix(subjects[8], data)
-
-    print(x_train.shape)
-    print(x_test.shape)
-
-    clf = LogisticRegression()
-    clf.fit(x_train, y_train)
-    accuracy = clf.score(x_test, y_test)
-    print('Accuracy LOGIT:',accuracy)
-
-# --------------------TESTING ABOVE--------------------
-'''
 
 
 
@@ -327,4 +322,6 @@ def test_logistic_regression():
 if __name__ == '__main__':
     # knn_classifier()
     # log_reg_classifier()
-    test_models_alone()
+    # test_models_alone()
+    # random_forest_classifier_tuning()
+    random_forest_classifier()
