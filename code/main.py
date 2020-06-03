@@ -149,103 +149,66 @@ def load_models(s):
     return knn_clf, log_clf, rfr_clf
 
 
-
-def test_models_alone():
-    ''' Calculates the miss/false alarm rates for each model individually'''
-
-    _, subjects = read_data()
-   
-    knn_results = {}
-    knn_results['miss rate'] = []
-    knn_results['false alarm rate'] = []
-
-    log_results = {}
-    log_results['miss rate'] = []
-    log_results['false alarm rate'] = []
-
-    rfr_results = {}
-    rfr_results['miss rate'] = []
-    rfr_results['false alarm rate'] = []
-
-    for s in subjects:
-
-        knn_clf, log_clf, rfr_clf = load_models(s)   # ADD NEW MODELS HERE
-
-        _, x_test, _, y_test = load_data_sklearn(s)
-        n = len(y_test)
-
-        knn_pred = knn_clf.predict(x_test)
-        miss_knn = 0
-        f_alarm_knn = 0
-
-        log_pred = log_clf.predict(x_test)
-        miss_log = 0
-        f_alarm_log = 0
-
-        rfr_pred = rfr_clf.predict(x_test)
-        miss_rfr = 0
-        f_alarm_rfr = 0
-
-        for i in range(n):
-
-            if knn_pred[i] == 1.0 and y_test[i] == -1.0:
-                miss_knn += 1
-            elif knn_pred[i] == -1.0 and y_test[i] == 1.0:
-                f_alarm_knn += 1
-
-            if log_pred[i] == 1.0 and y_test[i] == -1.0:
-                miss_log += 1
-            elif log_pred[i] == -1.0 and y_test[i] == 1.0:
-                f_alarm_log += 1
-            
-            if rfr_pred[i] == 1.0 and y_test[i] == -1.0:
-                miss_rfr += 1
-                
-            elif rfr_pred[i] == -1.0 and y_test[i] == 1.0:
-                f_alarm_rfr += 1
-                
-        
-        
-            
-        knn_results['miss rate'].append(miss_knn/n)
-        knn_results['false alarm rate'].append(f_alarm_knn/n)
-
-        log_results['miss rate'].append(miss_log/n)
-        log_results['false alarm rate'].append(f_alarm_log/n)
-
-        rfr_results['miss rate'].append(miss_rfr/n)
-        rfr_results['false alarm rate'].append(f_alarm_rfr/n)
-
-    print('Pred:',log_pred[:30])
-    print('Test:',y_test[:30])
-
-    print('KNN Average miss rate:', sum(knn_results['miss rate'])/len(subjects))
-    print('KNN Average false alarm rate:', sum(knn_results['false alarm rate'])/len(subjects))
-
-    print('\nLogistic Average miss rate:', sum(log_results['miss rate'])/len(subjects))
-    print('Logistic Average false alarm rate:', sum(log_results['false alarm rate'])/len(subjects))
-
-    print('\nRandom Forest Average miss rate:', sum(rfr_results['miss rate'])/len(subjects))
-    print('Random Forest Average false alarm rate:', sum(rfr_results['false alarm rate'])/len(subjects))
-        
+def load_model(name, s):
+    ''' Returns the corresponding model for a subject '''
+    return load('models/' + name + '/' + s + '.joblib')
 
 
+def get_best_k(s):
+    ''' Returns the calculated best k value for a given subject's KNN model'''
+    with open(MODELS_KNN+'best_k.json') as json_file:
+        best_k = json.load(json_file)
+    
+    return best_k[s]
 
+
+def get_params_rf(s):
+    ''' Returns the calculate best hyperparameters for a subject's
+        Random Forest model '''
+    with open(MODELS_RF+'best_params.json') as json_file:
+        params = json.load(json_file)
+    
+    return params[s]
 
 
 def knn_classifier():
     ''' Generates a KNN model for each subject, stored in models/knn/ folder'''
     _, subjects = read_data()
-    k = 2   # yielded highest accuracy
 
     for s in subjects:
         x_train, _, y_train, _ = load_data_sklearn(s)
+        k = get_best_k(s)
         clf = KNeighborsClassifier(algorithm='brute',
                                    metric='minkowski',
                                    n_neighbors=k)
         clf.fit(x_train, y_train)
+
+        dump(clf, MODELS_KNN + s + '.joblib')
+
+
+def knn_tuning():
+    data, subjects = read_data()
+    k_params = {}
+
+    for s in subjects:
+        acc = {}
+        for k in range(1, 20):
+            
+            x, y = load_all_data(s, data)
+            x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.5, train_size=0.5)
+            clf = KNeighborsClassifier(algorithm='brute', metric='minkowski', n_neighbors=k)
+            clf.fit(x_train, y_train)
+
+            accuracy = clf.score(x_test, y_test)
+            acc[k] = accuracy
+        
+        best_k = (max(acc.items(), key=operator.itemgetter(1))[0])
+        k_params[s]= best_k
     
-        dump(clf, MODELS_KNN + s + '.joblib') 
+    with open(MODELS_KNN+'best_k.json', 'w') as fp:
+        json.dump(k_params, fp)
+
+    # CALCULATED k = 2 yields highest accuracy on average
 
 
 
@@ -269,26 +232,12 @@ def random_forest_classifier():
     
     for s in subjects:
         x_train, _, y_train, _ = load_data_sklearn(s)
-        clf = RandomForestRegressor(n_estimators=800, min_samples_split=5, min_samples_leaf=1, 
-                                    max_features='sqrt', max_depth=90, bootstrap=False)
+        params = get_params_rf(s)
+        clf = RandomForestRegressor(**params)
         clf.fit(x_train, y_train)
         dump(clf, MODELS_RF + s + '.joblib')
         #visualize_tree(clf, s)
 
-
-def visualize_tree(clf, s):
-    ''' Creates a graphics diagram of a tree from the random forest '''
-    estimator = clf.estimators_[5]
-
-    export_graphviz(estimator, out_file=TREE_GRAPHS+s+'tree.dot', 
-                feature_names = get_features(),
-                class_names = ['genuine user', 'imposter'],
-                rounded = True, proportion = False, 
-                precision = 2, filled = True)
-
-    check_call(['dot', '-Tpng', TREE_GRAPHS+s+'tree.dot', '-o', TREE_GRAPHS+s+'tree.png', '-Gdpi=600'])
-    Image(filename=TREE_GRAPHS+s+'tree.png')
-    remove(TREE_GRAPHS+s+'tree.dot')
 
 
 def random_forest_classifier_tuning():
@@ -323,36 +272,24 @@ def random_forest_classifier_tuning():
     
     with open(MODELS_RF+'best_params.json', 'w') as fp:
         json.dump(best, fp)
-    # S[0] = {'n_estimators': 800, 'min_samples_split': 5, 'min_samples_leaf': 1, 'max_features': 'sqrt', 'max_depth': 90, 'bootstrap': False}
-    # Improved accuracy from 87% default to 90% with best
 
 
 
-def knn_tuning():
-    data, subjects = read_data()
-    
-    all_results = []
-    accs = []
-    for i in range(50):
-        acc = {}
-        for k in range(1, 5):
-            
-            x, y = load_all_data(subjects[i], data)
-            x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.5, train_size=0.5)
-            # x_train, y_train, x_test, y_test = load_datasets_mix(subjects[3], data)
+def visualize_tree(clf, s):
+    ''' Creates a graphics diagram of a tree from the random forest '''
+    estimator = clf.estimators_[5]
 
-            clf = KNeighborsClassifier(algorithm='brute', metric='minkowski', n_neighbors=k)
-            
-            clf.fit(x_train, y_train)
-            accuracy = clf.score(x_test, y_test)
-            acc[k] = accuracy
-        
-        best_k = (max(acc.items(), key=operator.itemgetter(1))[0])
-        accs.append(acc[best_k])
-        all_results.append(best_k)
-            
-    print(mode(all_results))
-    # CALCULATED k = 2 yields highest accuracy
+    export_graphviz(estimator, out_file=TREE_GRAPHS+s+'tree.dot', 
+                feature_names = get_features(),
+                class_names = ['genuine user', 'imposter'],
+                rounded = True, proportion = False, 
+                precision = 2, filled = True)
+
+    check_call(['dot', '-Tpng', TREE_GRAPHS+s+'tree.dot', '-o', TREE_GRAPHS+s+'tree.png', '-Gdpi=600'])
+    Image(filename=TREE_GRAPHS+s+'tree.png')
+    remove(TREE_GRAPHS+s+'tree.dot')
+
+
 
 def support_vector_classifier():
     ''' Generates a Support Vector Machine classifier model for each 
@@ -390,16 +327,139 @@ def support_vector_classifier():
 
 
 
+def evaluate_all_models_alone():
+    ''' Evaluates all models alone and generates results files '''
+    models = [('knn', False), ('logistic', False), ('randfor', True)]
+    for m in models:
+        evaluate_model(m[0], m[1])
+
+
+
+def evaluate_model(name, check_pred):
+    ''' _Evaluates the model named by calculating the false alarm and miss rates 
+        Params: name - name of model, check_pred - True if model returns probability not label '''
+    _, subjects = read_data()
+
+    miss_rate = []
+    f_alarm_rate = []
+    accs = []
+    results = {}
+
+    for s in subjects:
+        _, x_test, _, y_test = load_data_sklearn(s)
+        n = len(y_test)
+        miss = 0
+        f_a = 0
+
+        clf = load_model(name, s)
+        y_pred = clf.predict(x_test)
+
+        for i in range(n):
+            if check_pred:
+                if y_pred[i] >= 0.5 and y_test[i] == -1.0:
+                    miss += 1
+                elif y_pred[i] < 0.5 and y_test[i] == 1.0:
+                    f_a += 1
+
+            else:
+                if y_pred[i] == 1.0 and y_test[i] == -1.0:
+                    miss += 1
+                elif y_pred[i] == -1.0 and y_test[i] == 1.0:
+                    f_a += 1
+        
+        miss_rate.append(miss / n)
+        f_alarm_rate.append(f_a / n)
+        accs.append(clf.score(x_test, y_test))
+
+    results['miss rate mean'] = np.array(miss_rate).mean()
+    results['miss rate SD'] = np.array(miss_rate).std()
+    results['false alarm rate mean'] = np.array(f_alarm_rate).mean()
+    results['false alarm rate SD'] = np.array(f_alarm_rate).std()
+    results['accuracy mean'] = np.array(accs).mean()
+    results['accuracy SD'] = np.array(accs).std()
+
+    with open(RESULTS_ALONE + name + '.json', 'w') as fp:
+        json.dump(results, fp)
+
+
+
+def evaluate_majority_vote(models):
+    ''' Evaluates the performance of using multiple classifiers and taking a majority vote'''
+    _, subjects = read_data()
+    num_models = len(models)
+
+    miss_rate = []
+    f_alarm_rate = []
+    accs = []
+    results = {}
+    fname = RESULTS_COMBO
+
+    first = True
+    for s in subjects:
+        clfs = []
+        for m in models:
+            clfs.append(load_model(m[0], s))
+            if first:
+                fname += m[0] + '-'
+                first = False
+        
+        _, x_test, _, y_test = load_data_sklearn(s)
+        
+        preds = []
+        for i in range(num_models):
+            pred = clfs[i].predict(x_test)
+            if models[i][1]: # if check_pred is true
+                pred = np.where(pred >= 0.5, 1.0, -1.0)
+            preds.append(pred)
+        
+        n = len(y_test)
+        miss = 0
+        f_a = 0
+        
+        for i in range(n):
+            votes = []
+            for p in preds:
+                votes.append(p[i])
+
+            if sum(votes) >= 1.0:
+                classify = 1.0
+            else:
+                classify = -1.0
+            
+            if classify == 1.0 and y_test[i] == -1.0:
+                    miss += 1
+            elif classify == -1.0 and y_test[i] == 1.0:
+                f_a += 1
+
+        miss_rate.append(miss / n)
+        f_alarm_rate.append(f_a / n)
+        accs.append((n - miss - f_a)/n)
+
+    results['miss rate mean'] = np.array(miss_rate).mean()
+    results['miss rate SD'] = np.array(miss_rate).std()
+    results['false alarm rate mean'] = np.array(f_alarm_rate).mean()
+    results['false alarm rate SD'] = np.array(f_alarm_rate).std()
+    results['accuracy mean'] = np.array(accs).mean()
+    results['accuracy SD'] = np.array(accs).std()
+    
+    fname = fname[:-1] + '.json'
+    with open(fname, 'w') as fp:
+        json.dump(results, fp)
+            
+            
+    
+
+def run_majority_votes():
+    models = [('knn', False), ('logistic', False), ('randfor', True)]
+    evaluate_majority_vote(models)
+
+
 
 if __name__ == '__main__':
-    # knn_classifier()
-    # log_reg_classifier()
-    # random_forest_classifier_tuning()
-    # random_forest_classifier()
-    # test_models_alone()
-    random_forest_classifier_tuning()
-    #random_forest_classifier()
-    support_vector_classifier()
+    # support_vector_classifier()
+    evaluate_all_models_alone()
+    run_majority_votes()
+
 
 
 
