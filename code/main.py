@@ -10,6 +10,10 @@ from sklearn.neighbors import KNeighborsClassifier, NearestNeighbors
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
+from sklearn import metrics
+from sklearn.svm import SVC
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import classification_report
 from IPython.display import Image
 from sklearn.tree import export_graphviz
 from subprocess import check_call
@@ -350,7 +354,39 @@ def knn_tuning():
     print(mode(all_results))
     # CALCULATED k = 2 yields highest accuracy
 
+def support_vector_classifier():
+    ''' Generates a Support Vector Machine classifier model for each 
+        subject stored in models/svm/ folder '''
+    _, subjects = read_data()
+    
+ 
+    x_train, x_test, y_train, y_test= load_data_sklearn(subjects[0])
+    
+    #visualize_tree(clf, s)
+    #param_grid = [{'kernel': ['rbf'], 'gamma': [1,10,100],'C': [1, 10, 100, 1000]}]
 
+    param_grid = {"kernel":["linear","rbf","poly"], "C" : [i for i in range(1,1000,10)] , "degree": [1,2,3]}
+    
+    #Split and pass in data to train SVM
+    grid_classifier = GridSearchCV(SVC(gamma = "auto",decision_function_shape="ovo"), param_grid, scoring = 'recall_macro', cv = 5)
+    grid_classifier.fit(x_train,y_train)
+
+    # Needed if we want to take note of statistical data of each model 
+    # print("\nGrid scores on development set:")
+    # print()
+    # means = grid_classifier.cv_results_['mean_test_score']
+    # stds = grid_classifier.cv_results_['std_test_score']
+    # for mean, std, params in zip(means, stds, grid_classifier.cv_results_['params']):
+    #     print("%0.3f (+/-%0.03f) for %r"
+    #         % (mean, std * 2, params))
+
+    print("\nBest parameters set found on development set:\n")
+
+    print(grid_classifier.best_params_)
+    y_pred = grid_classifier.predict(x_test)
+    print(classification_report(y_test, y_pred,target_names= ["user", "intruder"]))
+    dump(grid_classifier, MODELS_SVM + subjects[0] + '.joblib')
+    return grid_classifier.best_estimator_.score, grid_classifier.best_estimator_
 
 
 
@@ -362,3 +398,24 @@ if __name__ == '__main__':
     # random_forest_classifier()
     # test_models_alone()
     random_forest_classifier_tuning()
+    #random_forest_classifier()
+    support_vector_classifier()
+
+
+
+# def SVM():
+#     print("---------------Running Training---------------")
+#     accuracies = []
+#     models = []
+#     #Training on different Cross Fold Validation sets
+#     for i in range(1,6):
+#         accuracies[i],models[i] = trainSVM(i)
+
+#     print("-------------All Estimator Scores-------------")
+#     for i in accuracies:
+#         print(i)
+    
+#     print("----------------Best Estimator-----------------")
+#     print("Model:")
+#     print(models[accuracies.index(max(accuracies))])
+#     print("Score:",max(accuracies))
