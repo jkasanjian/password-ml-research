@@ -8,7 +8,7 @@ from joblib import dump, load
 from scipy.stats import mode
 from sklearn.neighbors import KNeighborsClassifier, NearestNeighbors
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn import metrics
 from sklearn.svm import SVC
@@ -17,6 +17,7 @@ from sklearn.metrics import classification_report
 from IPython.display import Image
 from sklearn.tree import export_graphviz
 from subprocess import check_call
+from sklearn.pipeline import Pipeline
 
 
 # DIRECTORIES
@@ -178,6 +179,14 @@ def get_params_knn(s):
     return params[s]
 
 
+def get_params_logit(s):
+    ''' Returns the calculate best hyperparameters for a subject's
+        Random Forest model '''
+    with open(MODELS_LOGIT+'best_params.json') as json_file:
+        params = json.load(json_file)
+    return params[s]
+
+
 def knn_classifier():
     ''' Generates a KNN model for each subject, stored in models/knn/ folder'''
     _, subjects = read_data()
@@ -216,6 +225,34 @@ def knn_tuning():
 
 
 
+def log_reg_tuning():
+    _, subjects = read_data()
+    best_params = {}
+
+    pipe = Pipeline([('classifier' , RandomForestClassifier())])
+    param_grid = [
+        {'classifier' : [LogisticRegression()],
+        'classifier__penalty' : ['l1', 'l2'],
+        'classifier__C' : np.logspace(-4, 4, 20),
+        'classifier__solver' : ['liblinear']},
+        {'classifier' : [RandomForestClassifier()],
+        'classifier__n_estimators' : list(range(10,101,10)),
+        'classifier__max_features' : list(range(6,31,5))}
+    ]
+
+    for s in subjects:
+        x_train, _, y_train, _ = load_data_sklearn(s)
+
+        clf = GridSearchCV(pipe, param_grid = param_grid, cv = 5, verbose=True, n_jobs=-1)
+        clf.fit(x_train, y_train)
+
+        best_params[s] = clf.best_params_
+        
+    with open(MODELS_LOGIT+'best_params.json', 'w') as fp:
+        json.dump(best_params, fp)
+
+
+
 def log_reg_classifier():
     ''' Generates a Logistic regression model for each subject, 
         stored in models/logistic/ folder '''
@@ -224,6 +261,8 @@ def log_reg_classifier():
     for s in subjects:
         x_train, _, y_train, _ = load_data_sklearn(s) 
         clf = LogisticRegression()
+        params = get_params_logit(s)
+        clf.set_params(**params)
         clf.fit(x_train, y_train)
 
         dump(clf, MODELS_LOGIT + s + '.joblib')
@@ -470,6 +509,8 @@ if __name__ == '__main__':
     # support_vector_classifier()
     # evaluate_model('svm', False)
     # evaluate_all_models_alone()
+    log_reg_tuning()
+    log_reg_classifier()
     run_majority_votes()
 
 
