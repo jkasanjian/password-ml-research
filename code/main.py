@@ -167,7 +167,14 @@ def get_params_rf(s):
         Random Forest model '''
     with open(MODELS_RF+'best_params.json') as json_file:
         params = json.load(json_file)
-    
+    return params[s]
+
+
+def get_params_knn(s):
+    ''' Returns the calculate best hyperparameters for a subject's
+        Random Forest model '''
+    with open(MODELS_KNN+'best_params.json') as json_file:
+        params = json.load(json_file)
     return params[s]
 
 
@@ -177,38 +184,35 @@ def knn_classifier():
 
     for s in subjects:
         x_train, _, y_train, _ = load_data_sklearn(s)
-        k = get_best_k(s)
-        clf = KNeighborsClassifier(algorithm='brute',
-                                   metric='minkowski',
-                                   n_neighbors=k)
+        params = get_params_knn(s)
+        clf = KNeighborsClassifier(algorithm='brute', metric='minkowski')
+        clf.set_params(**params)
         clf.fit(x_train, y_train)
 
         dump(clf, MODELS_KNN + s + '.joblib')
 
 
 def knn_tuning():
-    data, subjects = read_data()
-    k_params = {}
+    _, subjects = read_data()
+    best_params = {}
+
+
+    leaf_size = list(range(1,50))
+    n_neighbors = list(range(1,30))
+    p=[1,2]
+    hyperparameters = dict(leaf_size=leaf_size, n_neighbors=n_neighbors, p=p)
 
     for s in subjects:
-        acc = {}
-        for k in range(1, 20):
-            
-            x, y = load_all_data(s, data)
-            x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.5, train_size=0.5)
-            clf = KNeighborsClassifier(algorithm='brute', metric='minkowski', n_neighbors=k)
-            clf.fit(x_train, y_train)
+        x_train, _, y_train, _ = load_data_sklearn(s)
 
-            accuracy = clf.score(x_test, y_test)
-            acc[k] = accuracy
+        knn_tune = KNeighborsClassifier()
+        clf = GridSearchCV(knn_tune, hyperparameters, cv=10)
+        clf.fit(x_train, y_train)
         
-        best_k = (max(acc.items(), key=operator.itemgetter(1))[0])
-        k_params[s]= best_k
+        best_params[s] = clf.best_params_
     
-    with open(MODELS_KNN+'best_k.json', 'w') as fp:
-        json.dump(k_params, fp)
-
-    # CALCULATED k = 2 yields highest accuracy on average
+    with open(MODELS_KNN+'best_params.json', 'w') as fp:
+        json.dump(best_params, fp)
 
 
 
@@ -295,35 +299,38 @@ def support_vector_classifier():
     ''' Generates a Support Vector Machine classifier model for each 
         subject stored in models/svm/ folder '''
     _, subjects = read_data()
+    best_params = {}
     
- 
-    x_train, x_test, y_train, y_test= load_data_sklearn(subjects[0])
-    
-    #visualize_tree(clf, s)
-    #param_grid = [{'kernel': ['rbf'], 'gamma': [1,10,100],'C': [1, 10, 100, 1000]}]
+    for s in subjects:
+        x_train, _, y_train, _= load_data_sklearn(subjects[0])
+        
+        #visualize_tree(clf, s)
+        #param_grid = [{'kernel': ['rbf'], 'gamma': [1,10,100],'C': [1, 10, 100, 1000]}]
 
-    param_grid = {"kernel":["linear","rbf","poly"], "C" : [i for i in range(1,1000,10)] , "degree": [1,2,3]}
-    
-    #Split and pass in data to train SVM
-    grid_classifier = GridSearchCV(SVC(gamma = "auto",decision_function_shape="ovo"), param_grid, scoring = 'recall_macro', cv = 5)
-    grid_classifier.fit(x_train,y_train)
+        param_grid = {"kernel":["linear","rbf","poly"], "C" : [i for i in range(1,1000,10)] , "degree": [1,2,3]}
+        
+        #Split and pass in data to train SVM
+        grid_classifier = GridSearchCV(SVC(gamma = "auto",decision_function_shape="ovo"), param_grid, scoring = 'recall_macro', cv = 5)
+        grid_classifier.fit(x_train,y_train)
 
-    # Needed if we want to take note of statistical data of each model 
-    # print("\nGrid scores on development set:")
-    # print()
-    # means = grid_classifier.cv_results_['mean_test_score']
-    # stds = grid_classifier.cv_results_['std_test_score']
-    # for mean, std, params in zip(means, stds, grid_classifier.cv_results_['params']):
-    #     print("%0.3f (+/-%0.03f) for %r"
-    #         % (mean, std * 2, params))
+        # Needed if we want to take note of statistical data of each model 
+        # print("\nGrid scores on development set:")
+        # print()
+        # means = grid_classifier.cv_results_['mean_test_score']
+        # stds = grid_classifier.cv_results_['std_test_score']
+        # for mean, std, params in zip(means, stds, grid_classifier.cv_results_['params']):
+        #     print("%0.3f (+/-%0.03f) for %r"
+        #         % (mean, std * 2, params))
 
-    print("\nBest parameters set found on development set:\n")
+        best_params[s] = (grid_classifier.best_params_)
+        
+        # print(classification_report(y_test, y_pred,target_names= ["user", "intruder"]))
+        dump(grid_classifier, MODELS_SVM + s + '.joblib')
 
-    print(grid_classifier.best_params_)
-    y_pred = grid_classifier.predict(x_test)
-    print(classification_report(y_test, y_pred,target_names= ["user", "intruder"]))
-    dump(grid_classifier, MODELS_SVM + subjects[0] + '.joblib')
-    return grid_classifier.best_estimator_.score, grid_classifier.best_estimator_
+    with open(MODELS_SVM+'best_params.json', 'w') as fp:
+        json.dump(best_params, fp)
+
+    # return grid_classifier.best_estimator_.score, grid_classifier.best_estimator_
 
 
 
@@ -401,7 +408,7 @@ def evaluate_majority_vote(models):
             clfs.append(load_model(m[0], s))
             if first:
                 fname += m[0] + '-'
-                first = False
+        first = False
         
         _, x_test, _, y_test = load_data_sklearn(s)
         
@@ -456,8 +463,13 @@ def run_majority_votes():
 
 
 if __name__ == '__main__':
+    # random_forest_classifier_tuning()
+    # knn_tuning()
+    # knn_classifier()
+    # evaluate_model('knn', False)
     # support_vector_classifier()
-    evaluate_all_models_alone()
+    # evaluate_model('svm', False)
+    # evaluate_all_models_alone()
     run_majority_votes()
 
 
