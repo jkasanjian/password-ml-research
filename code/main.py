@@ -156,14 +156,6 @@ def load_model(name, s):
     return load('models/' + name + '/' + s + '.joblib')
 
 
-def get_best_k(s):
-    ''' Returns the calculated best k value for a given subject's KNN model'''
-    with open(MODELS_KNN+'best_k.json') as json_file:
-        best_k = json.load(json_file)
-    
-    return best_k[s]
-
-
 def get_params_rf(s):
     ''' Returns the calculate best hyperparameters for a subject's
         Random Forest model '''
@@ -188,9 +180,18 @@ def get_params_logreg(s):
     return params[s]
 
 
+def get_params_svm(s):
+    ''' Returns the calculate best hyperparameters for a subject's
+        Random Forest model '''
+    with open(MODELS_SVM+'best_params.json') as json_file:
+        params = json.load(json_file)
+    return params[s]
+
+
 # ---------------------------- KNN ----------------------------
 
 def knn_tuning():
+    ''' Calculates and saves the best hyperparameteres for each subject's KNN model '''
     _, subjects = read_data()
     best_params = {}
 
@@ -231,6 +232,8 @@ def knn_classifier():
 # ---------------------------- Logistic Regression ----------------------------
 
 def log_reg_tuning():
+    '''' Calculates and saves the best hyperparameteres for each subject's
+    Logistic Regression model '''
     _, subjects = read_data()
     best_params = {}
     
@@ -342,43 +345,39 @@ def visualize_tree(clf, s):
 
 # ---------------------------- SVM ----------------------------
 
-def support_vector_classifier():
-    ''' Generates a Support Vector Machine classifier model for each 
-        subject stored in models/svm/ folder '''
+def support_vector_tuning():
+    ''' Calculates and saves the best hyperparameteres for each subject's SVM model '''
     _, subjects = read_data()
     best_params = {}
+    param_grid = {"kernel":["linear","rbf","poly"], "C" : [i for i in range(1,1000,10)] , "degree": [1,2]}
     
     for s in subjects:
-        x_train, _, y_train, _= load_data_sklearn(subjects[0])
+        x_train, _, y_train, _= load_data_sklearn(s)
         
-        #visualize_tree(clf, s)
-        #param_grid = [{'kernel': ['rbf'], 'gamma': [1,10,100],'C': [1, 10, 100, 1000]}]
-
-        param_grid = {"kernel":["linear","rbf","poly"], "C" : [i for i in range(1,1000,10)] , "degree": [1,2,3]}
-        
-        #Split and pass in data to train SVM
-        grid_classifier = GridSearchCV(SVC(gamma = "auto",decision_function_shape="ovo"), param_grid, scoring = 'recall_macro', cv = 5)
+        grid_classifier = GridSearchCV(SVC(gamma ="auto",decision_function_shape="ovo"), param_grid, scoring = 'recall_macro', cv = 5)
         grid_classifier.fit(x_train,y_train)
 
-        # Needed if we want to take note of statistical data of each model 
-        # print("\nGrid scores on development set:")
-        # print()
-        # means = grid_classifier.cv_results_['mean_test_score']
-        # stds = grid_classifier.cv_results_['std_test_score']
-        # for mean, std, params in zip(means, stds, grid_classifier.cv_results_['params']):
-        #     print("%0.3f (+/-%0.03f) for %r"
-        #         % (mean, std * 2, params))
-
         best_params[s] = (grid_classifier.best_params_)
-        
-        # print(classification_report(y_test, y_pred,target_names= ["user", "intruder"]))
-        dump(grid_classifier, MODELS_SVM + s + '.joblib')
 
     with open(MODELS_SVM+'best_params.json', 'w') as fp:
         json.dump(best_params, fp)
 
-    # return grid_classifier.best_estimator_.score, grid_classifier.best_estimator_
 
+
+def support_vector_classifier():
+    ''' Generates a SVM classifier model for each sbuject
+        stored in models/svm/ folder '''
+    _, subjects = read_data()
+    
+    for s in subjects:
+        x_train, _, y_train, _ = load_data_sklearn(s)
+
+        params = get_params_svm(s)
+        clf = SVC(gamma ="auto",decision_function_shape="ovo")
+        clf.set_params(**params)
+        clf.fit(x_train, y_train)
+
+        dump(clf, MODELS_SVM + s + '.joblib')
 
 
 
@@ -507,41 +506,17 @@ def evaluate_majority_vote(models):
     
 
 def run_majority_votes():
-    models = [('knn', False), ('logistic', False), ('randfor', True)]
-    evaluate_majority_vote(models)
+    # models = 
+    models = [  [('knn', False), ('logistic', False), ('randfor', True)],
+                [('knn', False), ('logistic', False), ('svm', False)],
+                [('knn', False), ('randfor', True), ('svm', False)],
+                [('logistic', False), ('randfor', True), ('svm', True)] ]
+    
+    for m_set in models:
+        evaluate_majority_vote(m_set)
 
 
 
 
 if __name__ == '__main__':
-    # random_forest_classifier_tuning()
-    # knn_tuning()
-    # knn_classifier()
-    # evaluate_model('knn', False)
-    # support_vector_classifier()
-    # evaluate_model('svm', False)
-    # evaluate_all_models_alone()
-    # log_reg_tuning()
-    # log_reg_classifier()
-    # evaluate_model('logistic', False)
     run_majority_votes()
-
-
-
-
-# def SVM():
-#     print("---------------Running Training---------------")
-#     accuracies = []
-#     models = []
-#     #Training on different Cross Fold Validation sets
-#     for i in range(1,6):
-#         accuracies[i],models[i] = trainSVM(i)
-
-#     print("-------------All Estimator Scores-------------")
-#     for i in accuracies:
-#         print(i)
-    
-#     print("----------------Best Estimator-----------------")
-#     print("Model:")
-#     print(models[accuracies.index(max(accuracies))])
-#     print("Score:",max(accuracies))
