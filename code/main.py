@@ -17,7 +17,7 @@ from sklearn.metrics import classification_report
 from IPython.display import Image
 from sklearn.tree import export_graphviz
 from subprocess import check_call
-
+import os
 
 
 # DIRECTORIES
@@ -385,7 +385,7 @@ def support_vector_classifier():
 
 def evaluate_all_models_alone():
     ''' Evaluates all models alone and generates results files '''
-    models = [('knn', False), ('logistic', False), ('randfor', True)]
+    models = [('knn', False), ('logistic', False), ('randfor', True), ('svm', False)]
     for m in models:
         evaluate_model(m[0], m[1])
 
@@ -395,48 +395,70 @@ def evaluate_model(name, check_pred):
     ''' _Evaluates the model named by calculating the false alarm and miss rates 
         Params: name - name of model, check_pred - True if model returns probability not label '''
     _, subjects = read_data()
-
-    miss_rate = []
-    f_alarm_rate = []
-    accs = []
     results = {}
+    results['subjects'] = {}
+    all_miss_rate = []
+    all_f_alarm_rate = []
+    all_accs = []
+    all_pers = []
+    all_recs = []
 
     for s in subjects:
         _, x_test, _, y_test = load_data_sklearn(s)
+
+        s_results = {}
         n = len(y_test)
         miss = 0
         f_a = 0
+        total_pos = 0
 
         clf = load_model(name, s)
         y_pred = clf.predict(x_test)
 
         for i in range(n):
             if check_pred:
-                if y_pred[i] >= 0.5 and y_test[i] == -1.0:
-                    miss += 1
-                elif y_pred[i] < 0.5 and y_test[i] == 1.0:
+                y_pred = np.where(y_pred >= 0.5, 1.0, -1.0)
+
+            if y_test[i] == 1.0:
+                total_pos += 1
+                if y_pred[i] == -1.0:
                     f_a += 1
 
-            else:
-                if y_pred[i] == 1.0 and y_test[i] == -1.0:
-                    miss += 1
-                elif y_pred[i] == -1.0 and y_test[i] == 1.0:
-                    f_a += 1
+            elif y_test[i] == -1.0 and y_pred[i] == 1.0:
+                miss += 1
+
+        miss_rate = miss / n
+        false_alarm_rate = f_a / n
+        percision = (total_pos - miss) / ((total_pos - miss) + miss)
+        recall = (total_pos - miss) / ((total_pos - miss) + f_a)
+        accuracy = (n - miss - f_a) / n 
+
+        s_results['miss rate'] = miss_rate
+        all_miss_rate.append(miss_rate)
+        s_results['false alarm rate'] = false_alarm_rate
+        all_f_alarm_rate.append(false_alarm_rate)
+        s_results['percision'] = percision
+        all_pers.append(percision)
+        s_results['recall'] = recall
+        all_recs.append(recall)
+        s_results['accuracy'] = accuracy
+        all_accs.append(accuracy)
         
-        miss_rate.append(miss / n)
-        f_alarm_rate.append(f_a / n)
-        accs.append(clf.score(x_test, y_test))
-
-    results['miss rate mean'] = np.array(miss_rate).mean()
-    results['miss rate SD'] = np.array(miss_rate).std()
-    results['false alarm rate mean'] = np.array(f_alarm_rate).mean()
-    results['false alarm rate SD'] = np.array(f_alarm_rate).std()
-    results['accuracy mean'] = np.array(accs).mean()
-    results['accuracy SD'] = np.array(accs).std()
+        results['subjects'][s] = s_results
+        
+    results['miss rate mean'] = np.array(all_miss_rate).mean()
+    results['miss rate SD'] = np.array(all_miss_rate).std()
+    results['false alarm rate mean'] = np.array(all_f_alarm_rate).mean()
+    results['false alarm rate SD'] = np.array(all_f_alarm_rate).std()
+    results['percision mean'] = np.array(all_pers).mean()
+    results['percision SD'] = np.array(all_pers).std()
+    results['recall mean'] = np.array(all_recs).mean()
+    results['recall SD'] = np.array(all_recs).std()
+    results['accuracy mean'] = np.array(all_accs).mean()
+    results['accuracy SD'] = np.array(all_accs).std()
 
     with open(RESULTS_ALONE + name + '.json', 'w') as fp:
         json.dump(results, fp)
-
 
 
 def evaluate_majority_vote(models):
@@ -444,10 +466,13 @@ def evaluate_majority_vote(models):
     _, subjects = read_data()
     num_models = len(models)
 
-    miss_rate = []
-    f_alarm_rate = []
-    accs = []
     results = {}
+    results['subjects'] = {}
+    all_miss_rate = []
+    all_f_alarm_rate = []
+    all_accs = []
+    all_pers = []
+    all_recs = []
     fname = RESULTS_COMBO
 
     first = True
@@ -468,9 +493,11 @@ def evaluate_majority_vote(models):
                 pred = np.where(pred >= 0.5, 1.0, -1.0)
             preds.append(pred)
         
+        s_results = {}
         n = len(y_test)
         miss = 0
         f_a = 0
+        total_pos = 0
         
         for i in range(n):
             votes = []
@@ -482,21 +509,43 @@ def evaluate_majority_vote(models):
             else:
                 classify = -1.0
             
-            if classify == 1.0 and y_test[i] == -1.0:
-                    miss += 1
-            elif classify == -1.0 and y_test[i] == 1.0:
-                f_a += 1
+            if y_test[i] == 1.0:
+                total_pos += 1
+                if classify == -1.0:
+                    f_a += 1
 
-        miss_rate.append(miss / n)
-        f_alarm_rate.append(f_a / n)
-        accs.append((n - miss - f_a)/n)
+            elif y_test[i] == -1.0 and classify == 1.0:
+                miss += 1
 
-    results['miss rate mean'] = np.array(miss_rate).mean()
-    results['miss rate SD'] = np.array(miss_rate).std()
-    results['false alarm rate mean'] = np.array(f_alarm_rate).mean()
-    results['false alarm rate SD'] = np.array(f_alarm_rate).std()
-    results['accuracy mean'] = np.array(accs).mean()
-    results['accuracy SD'] = np.array(accs).std()
+        miss_rate = miss / n
+        false_alarm_rate = f_a / n
+        percision = (total_pos - miss) / ((total_pos - miss) + miss)
+        recall = (total_pos - miss) / ((total_pos - miss) + f_a)
+        accuracy = (n - miss - f_a) / n 
+
+        s_results['miss rate'] = miss_rate
+        all_miss_rate.append(miss_rate)
+        s_results['false alarm rate'] = false_alarm_rate
+        all_f_alarm_rate.append(false_alarm_rate)
+        s_results['percision'] = percision
+        all_pers.append(percision)
+        s_results['recall'] = recall
+        all_recs.append(recall)
+        s_results['accuracy'] = accuracy
+        all_accs.append(accuracy)
+        
+        results['subjects'][s] = s_results
+        
+    results['miss rate mean'] = np.array(all_miss_rate).mean()
+    results['miss rate SD'] = np.array(all_miss_rate).std()
+    results['false alarm rate mean'] = np.array(all_f_alarm_rate).mean()
+    results['false alarm rate SD'] = np.array(all_f_alarm_rate).std()
+    results['percision mean'] = np.array(all_pers).mean()
+    results['percision SD'] = np.array(all_pers).std()
+    results['recall mean'] = np.array(all_recs).mean()
+    results['recall SD'] = np.array(all_recs).std()
+    results['accuracy mean'] = np.array(all_accs).mean()
+    results['accuracy SD'] = np.array(all_accs).std()
     
     fname = fname[:-1] + '.json'
     with open(fname, 'w') as fp:
@@ -504,7 +553,6 @@ def evaluate_majority_vote(models):
             
             
     
-
 def run_majority_votes():
     # models = 
     models = [  [('knn', False), ('logistic', False), ('randfor', True)],
@@ -516,7 +564,34 @@ def run_majority_votes():
         evaluate_majority_vote(m_set)
 
 
+def print_all_stats():
+    # for f in listdir('results/alone/'):
+    #     file = 'results/alone/' + f
+
+    dash = '-' * 40
+    for path, _, files in os.walk('results'):
+        for name in files:
+            file = os.path.join(path, name)
+            
+            with open(file) as json_file:
+                data = json.load(json_file)
+                print('\n\nResults for', name[:-5])
+                print(dash)
+                print('{:<26s}{:<2.8f}'.format('Miss rate mean:', data['miss rate mean']))
+                print('{:<26s}{:<2.8f}'.format('False alarm rate mean:', data['false alarm rate mean']))
+                print('{:<26s}{:<2.8f}'.format('Percision mean:', data['percision mean']))
+                print('{:<26s}{:<2.8f}'.format('Recall mean:', data['recall mean']))
+                print('{:<26s}{:<2.8f}'.format('Accuracy mean:', data['accuracy mean']))
+                print()
+                print('{:<26s}{:<2.8f}'.format('Miss rate SD:', data['miss rate SD']))
+                print('{:<26s}{:<2.8f}'.format('False alarm rate SD:', data['false alarm rate SD']))
+                print('{:<26s}{:<2.8f}'.format('Percision SD:', data['percision SD']))
+                print('{:<26s}{:<2.8f}'.format('Recall SD:', data['recall SD']))
+                print('{:<26s}{:<2.8f}'.format('Accuracy SD:', data['accuracy SD']))
 
 
 if __name__ == '__main__':
     run_majority_votes()
+    # evaluate_model('knn', False)
+    # evaluate_all_models_alone()
+    print_all_stats()
