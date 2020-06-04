@@ -8,7 +8,7 @@ from joblib import dump, load
 from scipy.stats import mode
 from sklearn.neighbors import KNeighborsClassifier, NearestNeighbors
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn import metrics
 from sklearn.svm import SVC
@@ -17,7 +17,7 @@ from sklearn.metrics import classification_report
 from IPython.display import Image
 from sklearn.tree import export_graphviz
 from subprocess import check_call
-from sklearn.pipeline import Pipeline
+
 
 
 # DIRECTORIES
@@ -36,6 +36,7 @@ RESULTS_ALONE = 'results/alone/'
 RESULTS_COMBO = 'results/combo/'
 
 
+# ---------------------------- DATA PROCESSING ----------------------------
 
 def read_data():
     with open(DATA_JSON) as json_file:
@@ -179,7 +180,7 @@ def get_params_knn(s):
     return params[s]
 
 
-def get_params_logit(s):
+def get_params_logreg(s):
     ''' Returns the calculate best hyperparameters for a subject's
         Random Forest model '''
     with open(MODELS_LOGIT+'best_params.json') as json_file:
@@ -187,19 +188,7 @@ def get_params_logit(s):
     return params[s]
 
 
-def knn_classifier():
-    ''' Generates a KNN model for each subject, stored in models/knn/ folder'''
-    _, subjects = read_data()
-
-    for s in subjects:
-        x_train, _, y_train, _ = load_data_sklearn(s)
-        params = get_params_knn(s)
-        clf = KNeighborsClassifier(algorithm='brute', metric='minkowski')
-        clf.set_params(**params)
-        clf.fit(x_train, y_train)
-
-        dump(clf, MODELS_KNN + s + '.joblib')
-
+# ---------------------------- KNN ----------------------------
 
 def knn_tuning():
     _, subjects = read_data()
@@ -224,30 +213,43 @@ def knn_tuning():
         json.dump(best_params, fp)
 
 
+def knn_classifier():
+    ''' Generates a KNN model for each subject, stored in models/knn/ folder'''
+    _, subjects = read_data()
+
+    for s in subjects:
+        x_train, _, y_train, _ = load_data_sklearn(s)
+        params = get_params_knn(s)
+        clf = KNeighborsClassifier(algorithm='brute', metric='minkowski')
+        clf.set_params(**params)
+        clf.fit(x_train, y_train)
+
+        dump(clf, MODELS_KNN + s + '.joblib')
+
+
+
+# ---------------------------- Logistic Regression ----------------------------
 
 def log_reg_tuning():
     _, subjects = read_data()
     best_params = {}
-
-    pipe = Pipeline([('classifier' , RandomForestClassifier())])
-    param_grid = [
-        {'classifier' : [LogisticRegression()],
-        'classifier__penalty' : ['l1', 'l2'],
-        'classifier__C' : np.logspace(-4, 4, 20),
-        'classifier__solver' : ['liblinear']},
-        {'classifier' : [RandomForestClassifier()],
-        'classifier__n_estimators' : list(range(10,101,10)),
-        'classifier__max_features' : list(range(6,31,5))}
+    
+    param_grid = [    
+        {'penalty' : ['l1', 'l2', 'elasticnet', 'none'],
+        'C' : np.logspace(-4, 4, 20),
+        'solver' : ['lbfgs','newton-cg','liblinear','sag','saga'],
+        'max_iter' : [100, 1000, 2500, 5000]
+        }
     ]
 
     for s in subjects:
         x_train, _, y_train, _ = load_data_sklearn(s)
-
-        clf = GridSearchCV(pipe, param_grid = param_grid, cv = 5, verbose=True, n_jobs=-1)
-        clf.fit(x_train, y_train)
-
-        best_params[s] = clf.best_params_
         
+        log_model = LogisticRegression()
+        clf = GridSearchCV(log_model, param_grid = param_grid, cv = 3, verbose=True, n_jobs=-1)
+        clf.fit(x_train, y_train)
+        best_params[s] = clf.best_params_
+
     with open(MODELS_LOGIT+'best_params.json', 'w') as fp:
         json.dump(best_params, fp)
 
@@ -261,12 +263,15 @@ def log_reg_classifier():
     for s in subjects:
         x_train, _, y_train, _ = load_data_sklearn(s) 
         clf = LogisticRegression()
-        params = get_params_logit(s)
+        params = get_params_logreg(s)
         clf.set_params(**params)
         clf.fit(x_train, y_train)
 
         dump(clf, MODELS_LOGIT + s + '.joblib')
 
+
+
+# ---------------------------- Random Forest ----------------------------
 
 def random_forest_classifier():
     ''' Generates a Random Forest classifier model for each 
@@ -334,6 +339,9 @@ def visualize_tree(clf, s):
 
 
 
+
+# ---------------------------- SVM ----------------------------
+
 def support_vector_classifier():
     ''' Generates a Support Vector Machine classifier model for each 
         subject stored in models/svm/ folder '''
@@ -372,6 +380,9 @@ def support_vector_classifier():
     # return grid_classifier.best_estimator_.score, grid_classifier.best_estimator_
 
 
+
+
+# ---------------------------- EVALUATION ----------------------------
 
 def evaluate_all_models_alone():
     ''' Evaluates all models alone and generates results files '''
@@ -501,6 +512,7 @@ def run_majority_votes():
 
 
 
+
 if __name__ == '__main__':
     # random_forest_classifier_tuning()
     # knn_tuning()
@@ -509,8 +521,9 @@ if __name__ == '__main__':
     # support_vector_classifier()
     # evaluate_model('svm', False)
     # evaluate_all_models_alone()
-    log_reg_tuning()
-    log_reg_classifier()
+    # log_reg_tuning()
+    # log_reg_classifier()
+    # evaluate_model('logistic', False)
     run_majority_votes()
 
 
