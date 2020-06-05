@@ -465,7 +465,7 @@ def evaluate_majority_vote(models):
     ''' Evaluates the performance of using multiple classifiers and taking a majority vote'''
     _, subjects = read_data()
     num_models = len(models)
-
+    win_count = [0, 0, 0]
     results = {}
     results['subjects'] = {}
     all_miss_rate = []
@@ -517,6 +517,12 @@ def evaluate_majority_vote(models):
             elif y_test[i] == -1.0 and classify == 1.0:
                 miss += 1
 
+            # counting winners
+            for j in range(len(votes)):
+                if y_test[i] == votes[j]:
+                    win_count[j] += 1
+
+
         miss_rate = miss / n
         false_alarm_rate = f_a / n
         percision = (total_pos - miss) / ((total_pos - miss) + miss)
@@ -546,6 +552,7 @@ def evaluate_majority_vote(models):
     results['recall SD'] = np.array(all_recs).std()
     results['accuracy mean'] = np.array(all_accs).mean()
     results['accuracy SD'] = np.array(all_accs).std()
+    results['win count'] = win_count
     
     fname = fname[:-1] + '.json'
     with open(fname, 'w') as fp:
