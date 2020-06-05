@@ -1,0 +1,118 @@
+Results for logistic
+----------------------------------------
+False acceptance rate mean:   2.93681917
+False rejection rate mean:    2.57516340
+Precision mean:               93.42820229
+Recall mean:                  94.26350879
+Accuracy mean:                94.48801743
+
+False acceptance rate SD:     1.82524523
+False rejection rate SD:      1.75815779
+Precision SD:                 4.06897758
+Recall SD:                    3.65445831
+Accuracy SD:                  3.14177839
+
+
+Results for knn
+----------------------------------------
+False acceptance rate mean:   3.25925926
+False rejection rate mean:    2.64052288
+Precision mean:               92.70168572
+Recall mean:                  94.04712004
+Accuracy mean:                94.10021786
+
+False acceptance rate SD:     2.15392507
+False rejection rate SD:      1.48103287
+Precision SD:                 4.80611020
+Recall SD:                    3.23500233
+Accuracy SD:                  2.97827646
+
+
+Results for svm
+----------------------------------------
+False acceptance rate mean:   2.61873638
+False rejection rate mean:    2.37472767
+Precision mean:               94.11824842
+Recall mean:                  94.70507835
+Accuracy mean:                95.00653595
+
+False acceptance rate SD:     1.51507472
+False rejection rate SD:      1.44653122
+Precision SD:                 3.43762061
+Recall SD:                    3.06311944
+Accuracy SD:                  2.64162276
+
+
+Results for randfor
+----------------------------------------
+False acceptance rate mean:   0.14379085
+False rejection rate mean:    4.93681917
+Precision mean:               99.67454376
+Recall mean:                  90.33595716
+Accuracy mean:                94.91938998
+
+False acceptance rate SD:     0.25593334
+False rejection rate SD:      2.94361232
+Precision SD:                 0.58342277
+Recall SD:                    4.85819529
+Accuracy SD:                  2.99051016
+
+
+Results for knn-logistic-randfor
+----------------------------------------
+False acceptance rate mean:   0.98474946
+False rejection rate mean:    2.70152505
+Precision mean:               97.79067763
+Recall mean:                  94.29725222
+Accuracy mean:                96.31372549
+
+False acceptance rate SD:     1.04255139
+False rejection rate SD:      1.81249999
+Precision SD:                 2.36519238
+Recall SD:                    3.48377848
+Accuracy SD:                  2.38009029
+
+
+Results for logistic-randfor-svm
+----------------------------------------
+False acceptance rate mean:   1.86492375
+False rejection rate mean:    2.51416122
+Precision mean:               95.81397384
+Recall mean:                  94.55463632
+Accuracy mean:                95.62091503
+
+False acceptance rate SD:     1.26558332
+False rejection rate SD:      1.77204424
+Precision SD:                 2.85235462
+Recall SD:                    3.54170701
+Accuracy SD:                  2.66204906
+
+
+Results for knn-randfor-svm
+----------------------------------------
+False acceptance rate mean:   1.02832244
+False rejection rate mean:    2.62309368
+Precision mean:               97.69054868
+Recall mean:                  94.43240360
+Accuracy mean:                96.34858388
+
+False acceptance rate SD:     0.97508123
+False rejection rate SD:      1.67110208
+Precision SD:                 2.21483502
+Recall SD:                    3.29460392
+Accuracy SD:                  2.24530707
+
+
+Results for knn-logistic-svm
+----------------------------------------
+False acceptance rate mean:   2.24836601
+False rejection rate mean:    2.16557734
+Precision mean:               94.95444589
+Recall mean:                  95.20273466
+Accuracy mean:                95.58605664
+
+False acceptance rate SD:     1.45797056
+False rejection rate SD:      1.46472648
+Precision SD:                 3.28904593
+Recall SD:                    3.07010444
+Accuracy SD:                  2.53258392
