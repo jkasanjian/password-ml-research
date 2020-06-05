@@ -392,7 +392,7 @@ def evaluate_all_models_alone():
 
 
 def evaluate_model(name, check_pred):
-    ''' _Evaluates the model named by calculating the false alarm and miss rates 
+    ''' _Evaluates the model named by calculating the false rejection and false acceptance rates 
         Params: name - name of model, check_pred - True if model returns probability not label '''
     _, subjects = read_data()
     results = {}
@@ -429,16 +429,16 @@ def evaluate_model(name, check_pred):
 
         miss_rate = miss / n
         false_alarm_rate = f_a / n
-        percision = (total_pos - miss) / ((total_pos - miss) + miss)
+        precision = (total_pos - miss) / ((total_pos - miss) + miss)
         recall = (total_pos - miss) / ((total_pos - miss) + f_a)
         accuracy = (n - miss - f_a) / n 
 
-        s_results['miss rate'] = miss_rate
+        s_results['false acceptance rate'] = miss_rate
         all_miss_rate.append(miss_rate)
-        s_results['false alarm rate'] = false_alarm_rate
+        s_results['false rejection rate'] = false_alarm_rate
         all_f_alarm_rate.append(false_alarm_rate)
-        s_results['percision'] = percision
-        all_pers.append(percision)
+        s_results['precision'] = precision
+        all_pers.append(precision)
         s_results['recall'] = recall
         all_recs.append(recall)
         s_results['accuracy'] = accuracy
@@ -446,12 +446,12 @@ def evaluate_model(name, check_pred):
         
         results['subjects'][s] = s_results
         
-    results['miss rate mean'] = np.array(all_miss_rate).mean()
-    results['miss rate SD'] = np.array(all_miss_rate).std()
-    results['false alarm rate mean'] = np.array(all_f_alarm_rate).mean()
-    results['false alarm rate SD'] = np.array(all_f_alarm_rate).std()
-    results['percision mean'] = np.array(all_pers).mean()
-    results['percision SD'] = np.array(all_pers).std()
+    results['false acceptance rate mean'] = np.array(all_miss_rate).mean()
+    results['false acceptance rate SD'] = np.array(all_miss_rate).std()
+    results['false rejection rate mean'] = np.array(all_f_alarm_rate).mean()
+    results['false rejection rate SD'] = np.array(all_f_alarm_rate).std()
+    results['precision mean'] = np.array(all_pers).mean()
+    results['precision SD'] = np.array(all_pers).std()
     results['recall mean'] = np.array(all_recs).mean()
     results['recall SD'] = np.array(all_recs).std()
     results['accuracy mean'] = np.array(all_accs).mean()
@@ -525,16 +525,16 @@ def evaluate_majority_vote(models):
 
         miss_rate = miss / n
         false_alarm_rate = f_a / n
-        percision = (total_pos - miss) / ((total_pos - miss) + miss)
+        precision = (total_pos - miss) / ((total_pos - miss) + miss)
         recall = (total_pos - miss) / ((total_pos - miss) + f_a)
         accuracy = (n - miss - f_a) / n 
 
-        s_results['miss rate'] = miss_rate
+        s_results['false acceptance rate'] = miss_rate
         all_miss_rate.append(miss_rate)
-        s_results['false alarm rate'] = false_alarm_rate
+        s_results['false rejection rate'] = false_alarm_rate
         all_f_alarm_rate.append(false_alarm_rate)
-        s_results['percision'] = percision
-        all_pers.append(percision)
+        s_results['precision'] = precision
+        all_pers.append(precision)
         s_results['recall'] = recall
         all_recs.append(recall)
         s_results['accuracy'] = accuracy
@@ -542,12 +542,12 @@ def evaluate_majority_vote(models):
         
         results['subjects'][s] = s_results
         
-    results['miss rate mean'] = np.array(all_miss_rate).mean()
-    results['miss rate SD'] = np.array(all_miss_rate).std()
-    results['false alarm rate mean'] = np.array(all_f_alarm_rate).mean()
-    results['false alarm rate SD'] = np.array(all_f_alarm_rate).std()
-    results['percision mean'] = np.array(all_pers).mean()
-    results['percision SD'] = np.array(all_pers).std()
+    results['false acceptance rate mean'] = np.array(all_miss_rate).mean()
+    results['false acceptance rate SD'] = np.array(all_miss_rate).std()
+    results['false rejection rate mean'] = np.array(all_f_alarm_rate).mean()
+    results['false rejection rate SD'] = np.array(all_f_alarm_rate).std()
+    results['precision mean'] = np.array(all_pers).mean()
+    results['precision SD'] = np.array(all_pers).std()
     results['recall mean'] = np.array(all_recs).mean()
     results['recall SD'] = np.array(all_recs).std()
     results['accuracy mean'] = np.array(all_accs).mean()
@@ -584,21 +584,20 @@ def print_all_stats():
                 data = json.load(json_file)
                 print('\n\nResults for', name[:-5])
                 print(dash)
-                print('{:<26s}{:<2.8f}'.format('Miss rate mean:', data['miss rate mean']))
-                print('{:<26s}{:<2.8f}'.format('False alarm rate mean:', data['false alarm rate mean']))
-                print('{:<26s}{:<2.8f}'.format('Percision mean:', data['percision mean']))
-                print('{:<26s}{:<2.8f}'.format('Recall mean:', data['recall mean']))
-                print('{:<26s}{:<2.8f}'.format('Accuracy mean:', data['accuracy mean']))
+                print('{:<30s}{:<2.8f}'.format('False acceptance rate mean:', data['false acceptance rate mean']))
+                print('{:<30s}{:<2.8f}'.format('False rejection rate mean:', data['false rejection rate mean']))
+                print('{:<30s}{:<2.8f}'.format('Precision mean:', data['precision mean']))
+                print('{:<30s}{:<2.8f}'.format('Recall mean:', data['recall mean']))
+                print('{:<30s}{:<2.8f}'.format('Accuracy mean:', data['accuracy mean']))
                 print()
-                print('{:<26s}{:<2.8f}'.format('Miss rate SD:', data['miss rate SD']))
-                print('{:<26s}{:<2.8f}'.format('False alarm rate SD:', data['false alarm rate SD']))
-                print('{:<26s}{:<2.8f}'.format('Percision SD:', data['percision SD']))
-                print('{:<26s}{:<2.8f}'.format('Recall SD:', data['recall SD']))
-                print('{:<26s}{:<2.8f}'.format('Accuracy SD:', data['accuracy SD']))
+                print('{:<30s}{:<2.8f}'.format('False acceptance rate SD:', data['false acceptance rate SD']))
+                print('{:<30s}{:<2.8f}'.format('False rejection rate SD:', data['false rejection rate SD']))
+                print('{:<30s}{:<2.8f}'.format('Precision SD:', data['precision SD']))
+                print('{:<30s}{:<2.8f}'.format('Recall SD:', data['recall SD']))
+                print('{:<30s}{:<2.8f}'.format('Accuracy SD:', data['accuracy SD']))
 
 
 if __name__ == '__main__':
+    evaluate_all_models_alone()
     run_majority_votes()
-    # evaluate_model('knn', False)
-    # evaluate_all_models_alone()
     print_all_stats()
