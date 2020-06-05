@@ -456,7 +456,7 @@ def evaluate_model(name, check_pred):
     results['recall SD'] = np.array(all_recs).std()
     results['accuracy mean'] = np.array(all_accs).mean()
     results['accuracy SD'] = np.array(all_accs).std()
-
+    
     with open(RESULTS_ALONE + name + '.json', 'w') as fp:
         json.dump(results, fp)
 
@@ -579,22 +579,30 @@ def print_all_stats():
     for path, _, files in os.walk('results'):
         for name in files:
             file = os.path.join(path, name)
-            
-            with open(file) as json_file:
-                data = json.load(json_file)
-                print('\n\nResults for', name[:-5])
-                print(dash)
-                print('{:<30s}{:<2.8f}'.format('False acceptance rate mean:', 100*data['false acceptance rate mean']))
-                print('{:<30s}{:<2.8f}'.format('False rejection rate mean:', 100*data['false rejection rate mean']))
-                print('{:<30s}{:<2.8f}'.format('Precision mean:', 100*data['precision mean']))
-                print('{:<30s}{:<2.8f}'.format('Recall mean:', 100*data['recall mean']))
-                print('{:<30s}{:<2.8f}'.format('Accuracy mean:', 100*data['accuracy mean']))
-                print()
-                print('{:<30s}{:<2.8f}'.format('False acceptance rate SD:', 100*data['false acceptance rate SD']))
-                print('{:<30s}{:<2.8f}'.format('False rejection rate SD:', 100*data['false rejection rate SD']))
-                print('{:<30s}{:<2.8f}'.format('Precision SD:', 100*data['precision SD']))
-                print('{:<30s}{:<2.8f}'.format('Recall SD:', 100*data['recall SD']))
-                print('{:<30s}{:<2.8f}'.format('Accuracy SD:', 100*data['accuracy SD']))
+            if file[-5:] == '.json':
+                with open(file) as json_file:
+                    data = json.load(json_file)
+                    print('\n\n\nResults for', name[:-5])
+                    print(dash)
+
+                    print('{:<30s}{:<2.8f}'.format('Precision mean:', 100*data['precision mean']))
+                    print('{:<30s}{:<2.8f}'.format('Precision SD:', 100*data['precision SD']))
+                    print()
+                    print('{:<30s}{:<2.8f}'.format('Recall mean:', 100*data['recall mean']))
+                    print('{:<30s}{:<2.8f}'.format('Recall SD:', 100*data['recall SD']))
+                    print()
+                    print('{:<30s}{:<2.8f}'.format('FAR mean:', 100*data['false acceptance rate mean']))
+                    print('{:<30s}{:<2.8f}'.format('FAR SD:', 100*data['false acceptance rate SD']))
+                    print()
+                    print('{:<30s}{:<2.8f}'.format('FRR mean:', 100*data['false rejection rate mean']))
+                    print('{:<30s}{:<2.8f}'.format('FRR SD:', 100*data['false rejection rate SD']))
+                    
+                    
+                    
+                    
+                    
+                   
+
 
 
 if __name__ == '__main__':
