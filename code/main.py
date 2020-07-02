@@ -8,7 +8,7 @@ from joblib import dump, load
 from scipy.stats import mode
 from sklearn.neighbors import KNeighborsClassifier, NearestNeighbors
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn import metrics
 from sklearn.svm import SVC
@@ -298,31 +298,37 @@ def random_forest_classifier_tuning():
 
     n_estimators = [int(x) for x in np.linspace(start=200, stop=2000, num=10)]
     max_features = ['auto', 'sqrt']
-    max_depth = [int(x) for x in np.linspace(10, 110, num=11)]
+    max_depth = list(range(50, 100, 10))
     max_depth.append(None)
     min_samples_split = [2, 5, 10]
     min_samples_leaf = [1, 2, 4]
     bootstrap = [True, False]
 
-    for s in subjects:
-        x_train, _, y_train, _ = load_data_sklearn(s) 
-        # Create the random grid
-        random_grid = {'n_estimators': n_estimators,
+    param_dist = {'n_estimators': n_estimators,
                 'max_features': max_features,
                 'max_depth': max_depth,
                 'min_samples_split': min_samples_split,
                 'min_samples_leaf': min_samples_leaf,
                 'bootstrap': bootstrap}
 
-        rf = RandomForestRegressor()
-        rf_random = RandomizedSearchCV(estimator=rf, param_distributions=random_grid, 
-                                    n_iter=100, cv=3, verbose=2, random_state=42, n_jobs= 1)
-        rf_random.fit(x_train, y_train)
+    for s in subjects:
+        x_train, x_test, y_train, y_test = load_data_sklearn(s) 
+        # Create the random grid
+        print(s)
+        break
+        rf = RandomForestClassifier()
+        rf = GridSearchCV(estimator=rf, param_grid=param_dist, cv=3, scoring='precision_macro', n_jobs= -1)
+        rf.fit(x_train, y_train)
 
-        best[s] = rf_random.best_params_
-    
-    with open(MODELS_RF+'best_params.json', 'w') as fp:
-        json.dump(best, fp)
+        best[s] = rf.best_params_
+        print('DONE', rf.best_params_)
+        # break
+        y_pred = rf.predict(x_test)
+        print(metrics.classification_report(y_test, y_pred))
+        break
+
+    # with open(MODELS_RF+'best_params.json', 'w') as fp:
+    #     json.dump(best, fp)
 
 
 
@@ -608,4 +614,5 @@ def print_all_stats():
 if __name__ == '__main__':
     # evaluate_all_models_alone()
     # run_majority_votes()
-    print_all_stats()
+    # print_all_stats()
+    random_forest_classifier_tuning()
