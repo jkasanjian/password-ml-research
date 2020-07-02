@@ -1,0 +1,149 @@
+Results for logistic
+----------------------------------------
+F1 mean:                      93.49758495
+F1 SD:                        3.81948234
+
+Precision mean:               92.86171477
+Precision SD:                 4.98586566
+
+Recall mean:                  94.21965532
+Recall SD:                    3.23676093
+
+FAR mean:                     2.80882353
+FAR SD:                       1.88556711
+
+FRR mean:                     2.26470588
+FRR SD:                       1.20803252
+
+
+
+Results for knn
+----------------------------------------
+F1 mean:                      93.16167844
+F1 SD:                        3.68550068
+
+Precision mean:               92.04562216
+Precision SD:                 5.61819469
+
+Recall mean:                  94.46251937
+Recall SD:                    2.86017574
+
+FAR mean:                     3.13235294
+FAR SD:                       2.12383356
+
+FRR mean:                     2.16176471
+FRR SD:                       1.07878782
+
+
+
+Results for svm
+----------------------------------------
+F1 mean:                      94.14696182
+F1 SD:                        3.30438557
+
+Precision mean:               93.51999877
+Precision SD:                 4.02044810
+
+Recall mean:                  94.84131004
+Recall SD:                    3.30759862
+
+FAR mean:                     2.55882353
+FAR SD:                       1.52719485
+
+FRR mean:                     2.03431373
+FRR SD:                       1.28052877
+
+
+
+Results for randfor
+----------------------------------------
+F1 mean:                      97.18992201
+F1 SD:                        1.77270270
+
+Precision mean:               98.00228345
+Precision SD:                 1.67337285
+
+Recall mean:                  96.42357144
+Recall SD:                    2.55060496
+
+FAR mean:                     0.78921569
+FAR SD:                       0.64430489
+
+FRR mean:                     1.47549020
+FRR SD:                       1.06210910
+
+
+
+Results for knn-logistic-randfor
+----------------------------------------
+F1 mean:                      96.63229537
+F1 SD:                        1.94092449
+
+Precision mean:               97.08301697
+Precision SD:                 2.33332000
+
+Recall mean:                  96.22065636
+Recall SD:                    2.33194731
+
+FAR mean:                     1.14705882
+FAR SD:                       0.88862152
+
+FRR mean:                     1.53921569
+FRR SD:                       0.95277272
+
+
+
+Results for logistic-randfor-svm
+----------------------------------------
+F1 mean:                      95.40944520
+F1 SD:                        2.58380841
+
+Precision mean:               95.34432783
+Precision SD:                 3.05548130
+
+Recall mean:                  95.51373180
+Recall SD:                    2.76989601
+
+FAR mean:                     1.83823529
+FAR SD:                       1.16086463
+
+FRR mean:                     1.79901961
+FRR SD:                       1.10260343
+
+
+
+Results for knn-randfor-svm
+----------------------------------------
+F1 mean:                      96.60327060
+F1 SD:                        2.02584916
+
+Precision mean:               96.95977076
+Precision SD:                 2.44879803
+
+Recall mean:                  96.29069175
+Recall SD:                    2.47972929
+
+FAR mean:                     1.19607843
+FAR SD:                       0.93320254
+
+FRR mean:                     1.50980392
+FRR SD:                       1.01937214
+
+
+
+Results for knn-logistic-svm
+----------------------------------------
+F1 mean:                      94.86284251
+F1 SD:                        2.86981528
+
+Precision mean:               94.56940413
+Precision SD:                 3.62464324
+
+Recall mean:                  95.21683837
+Recall SD:                    2.94628269
+
+FAR mean:                     2.14215686
+FAR SD:                       1.37756437
+
+FRR mean:                     1.90686275
+FRR SD:                       1.16732557
