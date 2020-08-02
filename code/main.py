@@ -23,7 +23,7 @@ import os
 # DIRECTORIES
 DATA_SOURCE = 'data/DSL-StrongPasswordData.csv'
 DATA_JSON = 'data/password_data.json'
-DATA_SPLIT_SK = 'data/split/sklearn/'
+DATA_SPLIT = 'data/split/'
 
 MODELS_LOGIT = 'models/logistic/'
 MODELS_KNN = 'models/knn/'
@@ -102,47 +102,197 @@ def create_signature_graphs():
 def load_all_data(subject, data):
     '''
     Returns all data as x, y given a subject
-    x,y - all 400 repetitions of subject, first 10 of each imposter
+    x,y - all 400 repetitions of subject, all 20000 imposter sets
     '''
-    user = data[subject]
-    imposter = []
+    x_user = data[subject]
+    x_imposter = []
     for s in data:
         if s != subject:
-            imposter.extend(data[s][:12])
+            x_imposter.extend(data[s])
 
-    x = user + imposter
-    y = [1 for i in range(len(user))] + [-1 for i in range(len(imposter))]
-
-    return (np.array(x).astype(np.float64), np.array(y).astype(np.float64))
-
-
-def split_data_sklearn():
-    data, subjects = read_data()
-    for s in subjects:
-        mkdir(DATA_SPLIT_SK + s)
-
-        x, y = load_all_data(s, data)
-        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.4, train_size=0.6)
-        np.save(DATA_SPLIT_SK + s + '/x_train.npy', x_train)
-        np.save(DATA_SPLIT_SK + s + '/x_test.npy', x_test)
-        np.save(DATA_SPLIT_SK + s + '/y_train.npy', y_train)
-        np.save(DATA_SPLIT_SK + s + '/y_test.npy', y_test)
-
-
-def load_data_sklearn(s):
-    ''' Loads datasets for a subject s'''
-    x_train = np.load(DATA_SPLIT_SK + s + '/x_train.npy')
-    x_test = np.load(DATA_SPLIT_SK + s + '/x_test.npy')
-    y_train = np.load(DATA_SPLIT_SK + s + '/y_train.npy')
-    y_test = np.load(DATA_SPLIT_SK + s + '/y_test.npy')
-    return x_train, x_test, y_train, y_test
+    y_user = [1 for i in range(len(x_user))]
+    y_imposter = [-1 for i in range(len(x_imposter))]
+    print('\n\nSubject', subject)
+    print('number user:',len(x_user))
+    print('number imposter:',len(x_imposter))
+    return x_user, x_imposter, y_user, y_imposter
     
+
+def split_data_wval():
+    '''
+    Splits the data into 60% train, 20% validate, 20% test
+    For each set, we randomly select frn 
+    '''
+    data, subjects = read_data()
+    path = DATA_SPLIT + 'w-val/'
+    for s in subjects:
+        mkdir(path + s)
+
+        x_user_0, x_imposter_0, y_user_0, y_imposter_0 = load_all_data(s, data)
+        x_user = x_user_0.copy()
+        x_imposter = x_imposter_0.copy()
+        y_user = y_user_0.copy()
+        y_imposter = y_imposter_0.copy()
+        n_u = len(x_user)
+        n_i = len(x_imposter)
+
+        num_train_u = int(0.60 * n_u)
+        num_val_u = int(0.20 * n_u)
+        num_test_u = int(0.20 * n_u)
+        num_train_i = int(0.60 * n_i)
+        num_val_i = int(0.20 * n_i)
+        num_test_i = int(0.20 * n_i)
+        x_train = []
+        x_val = []
+        x_test = []
+        y_train = []
+        y_val = []
+        y_test = []
+
+        for c in range(num_train_u):
+            i = np.random.randint(0, len(x_user))
+            x_train.append(x_user.pop(i))
+            y_train.append(y_user.pop(i))
+        for c in range(num_train_i):
+            i = np.random.randint(0, len(x_imposter))
+            x_train.append(x_imposter.pop(i))
+            y_train.append(y_imposter.pop(i))
+
+        for c in range(num_val_u):
+            i = np.random.randint(0, len(x_user))
+            x_val.append(x_user.pop(i))
+            y_val.append(y_user.pop(i))
+        for c in range(num_val_i):
+            i = np.random.randint(0, len(x_imposter))
+            x_val.append(x_imposter.pop(i))
+            y_val.append(y_imposter.pop(i))
+
+        for c in range(num_test_u):
+            i = np.random.randint(0, len(x_user))
+            x_test.append(x_user.pop(i))
+            y_test.append(y_user.pop(i))
+        for c in range(num_test_i):
+            i = np.random.randint(0, len(x_imposter))
+            x_test.append(x_imposter.pop(i))
+            y_test.append(y_imposter.pop(i))
+        
+        x_train, y_train = shuffle(x_train, y_train)
+        x_test, y_test = shuffle(x_test, y_test)
+        x_val, y_val = shuffle(x_val, y_val)
+
+        x_train = np.array(x_train).astype(np.float64)
+        x_val = np.array(x_val).astype(np.float64)
+        x_test = np.array(x_test).astype(np.float64)
+        y_train = np.array(y_train).astype(np.float64)
+        y_val = np.array(y_val).astype(np.float64)
+        y_test = np.array(y_test).astype(np.float64)
+
+        np.save(path + s + '/x_train.npy', x_train)
+        np.save(path + s + '/x_val.npy', x_val)
+        np.save(path + s + '/x_test.npy', x_test)
+        np.save(path + s + '/y_train.npy', y_train)
+        np.save(path + s + '/y_val.npy', y_val)
+        np.save(path + s + '/y_test.npy', y_test)
+
+
+def split_data_nval():
+    ''' Splits the data into 70% train and 30% test '''
+    data, subjects = read_data()
+    path = DATA_SPLIT + 'n-val/'
+    for s in subjects:
+        mkdir(path + s)
+
+        x_user_0, x_imposter_0, y_user_0, y_imposter_0 = load_all_data(s, data)
+        x_user = x_user_0.copy()
+        x_imposter = x_imposter_0.copy()
+        y_user = y_user_0.copy()
+        y_imposter = y_imposter_0.copy()
+        n_u = len(x_user)
+        n_i = len(x_imposter)
+        print('number user:',n_u)
+        print('number imposter:',n_i)
+        num_train_u = int(0.70 * n_u)
+        num_test_u = int(0.30 * n_u)
+        num_train_i = int(0.70 * n_i)
+        num_test_i = int(0.30 * n_i)
+        x_train = []
+        x_test = []
+        y_train = []
+        y_test = []
+
+        for c in range(num_train_u):
+            i = np.random.randint(0, len(x_user))
+            x_train.append(x_user.pop(i))
+            y_train.append(y_user.pop(i))
+        for c in range(num_train_i):
+            i = np.random.randint(0, len(x_imposter))
+            x_train.append(x_imposter.pop(i))
+            y_train.append(y_imposter.pop(i))
+
+        for c in range(num_test_u):
+            i = np.random.randint(0, len(x_user))
+            x_test.append(x_user.pop(i))
+            y_test.append(y_user.pop(i))
+        for c in range(num_test_i):
+            i = np.random.randint(0, len(x_imposter))
+            x_test.append(x_imposter.pop(i))
+            y_test.append(y_imposter.pop(i))
+        
+        x_train, y_train = shuffle(x_train, y_train)
+        x_test, y_test = shuffle(x_test, y_test)
+
+        x_train = np.array(x_train).astype(np.float64)
+        x_test = np.array(x_test).astype(np.float64)
+        y_train = np.array(y_train).astype(np.float64)
+        y_test = np.array(y_test).astype(np.float64)
+
+        np.save(path + s + '/x_train.npy', x_train)
+        np.save(path + s + '/x_test.npy', x_test)
+        np.save(path + s + '/y_train.npy', y_train)
+        np.save(path + s + '/y_test.npy', y_test)
+
+
+def load_data_wval(s):
+    ''' Loads datasets for a subject s (train, test, val)'''
+    path = DATA_SPLIT + 'w-val/'
+    x_train = np.load(path + s + '/x_train.npy')
+    x_val   = np.lpad(path + s + '/x_val.npy')
+    x_test  = np.load(path + s + '/x_test.npy')
+    y_train = np.load(path + s + '/y_train.npy')
+    y_val   = np.load(path + s + '/y_val.npy')
+    y_test  = np.load(path + s + '/y_test.npy')
+    return x_train, x_val, x_test, y_train, y_val, y_test
+    
+
+def load_data_nval(s):
+    ''' Loads datasets for a subject s (train, test)'''
+    path = DATA_SPLIT + 'n-val/'
+    x_train = np.load(path + s + '/x_train.npy')
+    x_test  = np.load(path + s + '/x_test.npy')
+    y_train = np.load(path + s + '/y_train.npy')
+    y_test  = np.load(path + s + '/y_test.npy')
+    return x_train, x_test, y_train, y_test
+
 
 def load_model(name, s):
     ''' Returns the corresponding model for a subject '''
     return load('models/' + name + '/' + s + '.joblib')
 
 
+
+def shuffle(x, y):
+    ''' Shuffles the order of x/y pairs in the two arrays'''
+    for i in range(5 * len(x)):
+        i_1 = np.random.randint(0, len(x))
+        i_2 = np.random.randint(0, len(x))
+        temp_x = x[i_1]
+        x[i_1] = x[i_2]
+        x[i_2] = temp_x
+        temp_y = y[i_1]
+        y[i_1] = y[i_2]
+        y[i_2] = temp_y
+    
+    return x, y
 
 ###############################################################
 # ---------------------------- KNN ----------------------------
@@ -158,7 +308,7 @@ def knn_training():
     hyperparameters = dict(leaf_size=leaf_size, n_neighbors=n_neighbors, p=p)
 
     for s in subjects:
-        x_train, _, y_train, _ = load_data_sklearn(s)
+        x_train, _, y_train, _ = load_data_nval(s)
 
         knn_tune = KNeighborsClassifier(algorithm='brute', metric='minkowski')
         clf = GridSearchCV(knn_tune, hyperparameters, scoring='f1', n_jobs=-1)
@@ -185,7 +335,7 @@ def log_reg_training():
     hyperparameteres = dict(penalty=penalty, C=C, solver=solver, max_iter=max_iter)
 
     for s in subjects:
-        x_train, _, y_train, _ = load_data_sklearn(s)
+        x_train, _, y_train, _ = load_data_nval(s)
         
         log_tune = LogisticRegression()
         clf = GridSearchCV(log_tune, hyperparameteres, scoring='f1', n_jobs=-1)
@@ -219,7 +369,7 @@ def random_forest_training():
                 bootstrap=bootstrap)
 
     for s in subjects:
-        x_train, _, y_train, _ = load_data_sklearn(s) 
+        x_train, _, y_train, _ = load_data_nval(s) 
 
         rf_tune = RandomForestClassifier()
         clf = GridSearchCV(rf_tune, hyperparameteres, scoring='f1', n_jobs= -1)
@@ -261,7 +411,7 @@ def svm_training():
     hyperparameteres = dict(kernel=kernel, C=C, degree=degree)
     
     for s in subjects:
-        x_train, _, y_train, _= load_data_sklearn(s)
+        x_train, _, y_train, _= load_data_nval(s)
 
         svm_tune = SVC(gamma ='auto',decision_function_shape='ovo')
         clf = GridSearchCV(svm_tune, hyperparameteres, scoring='f1', n_jobs=-1)
@@ -304,7 +454,7 @@ def evaluate_model(name):
     all_f1s = []
 
     for s in subjects:
-        _, x_test, _, y_test = load_data_sklearn(s)
+        _, x_test, _, y_test = load_data_nval(s)
 
         s_results = {}
         n = len(y_test)
@@ -381,10 +531,10 @@ def evaluate_majority_vote(models):
         for m in models:
             clfs.append(load_model(m, s))
             if first:
-                fname += m + '-'
+                fname += m + '-' 
         first = False
         
-        _, x_test, _, y_test = load_data_sklearn(s)
+        _, x_test, _, y_test = load_data_nval(s)
         
         preds = []
         for i in range(num_models):
@@ -493,6 +643,9 @@ def print_all_stats():
 # ---------------------------- MAIN ----------------------------
 ################################################################
 if __name__ == '__main__':
+    # split_data_wval()
+    # split_data_nval()
+
     knn_training()
     print('KNN done training')
     log_reg_training()
