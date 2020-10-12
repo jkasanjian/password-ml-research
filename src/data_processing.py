@@ -10,6 +10,7 @@ DATA_PARTITIONS = "data/partitions/"
 
 
 def read_data():
+    """ Reads the data file and returns as a dictionary """
     with open(path.abspath("data/password_data.json")) as json_file:
         data = json.load(json_file)
     labels = data["subject"]
@@ -52,8 +53,13 @@ def partition_data_balanced():
 
     for s in data:
         x_pos, x_neg = get_pos_neg(data, s)
-
+        x = []
         # TODO: make balanced
+        x.extend(x_pos)
+        for i in range(len(x_pos)):
+
+
+
         x = np.array(x_pos + x_neg)
         y = np.array([1 for i in range(len(x_pos))] + [-1 for i in range(len(x_neg))])
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.30)
