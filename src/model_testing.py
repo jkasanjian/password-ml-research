@@ -12,12 +12,10 @@ def get_test_data(subject, is_balanced):
         path = 'data/partitions/balanced/'
     else:
         path = 'data/partitions/all/'
-    x_train = np.load(path + subject + '/x_test.npy')
-    y_train = np.load(path + subject + '/y_test.npy')
-    print(x_train.shape)
-    print(y_train.shape)
+    x_test = np.load(path + subject + '/x_test.npy')
+    y_test = np.load(path + subject + '/y_test.npy')
 
-    return x_train, y_train
+    return x_test, y_test
 
 
 

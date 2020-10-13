@@ -14,8 +14,6 @@ def get_train_data(subject, is_balanced):
         path = 'data/partitions/all/'
     x_train = np.load(path + subject + '/x_train.npy')
     y_train = np.load(path + subject + '/y_train.npy')
-    print(x_train.shape)
-    print(y_train.shape)
 
     return x_train, y_train
 
