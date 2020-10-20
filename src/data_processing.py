@@ -2,7 +2,6 @@ from os import path, mkdir
 import json
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
 
 
@@ -75,3 +74,4 @@ if __name__ == "__main__":
     """ Main method """
     partition_data_all()
     partition_data_balanced()
+    print("----------FINISHED EXECUTION----------")
