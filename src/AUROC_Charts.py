@@ -1,6 +1,6 @@
-from sklearn.metrics import roc_curve, roc_auc_score
+from sklearn.metricss import roc_curve, roc_auc_score
 import matplotlib.pyplot as plt 
-from model_testing import get_test_data
+from Helper import get_test_data
 #TODO create directory of results with each patient with balanced data and un_balanced data being tested on the models
 #TODO We have Two models charts per patient (1 for balanced) (1 for unbalanced)
 #TODO Average all auc_scores for each model oeach personn with balanced and un_balanced
@@ -9,6 +9,7 @@ class AUROC:
     def __init__(self,model, data, path):
         #list of models, list of test data, list of probabilities 
         #Does the model come with the data, or do I need to pass it 
+        #open models via file
         self.model = model
         self.path = path
         X_test, Y_test = get_test_data()

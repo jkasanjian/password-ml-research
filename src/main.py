@@ -42,13 +42,13 @@ RESULTS_COMBO = 'results/combo/'
 # ---------------------------- DATA PROCESSING ----------------------------
 ###########################################################################
 
-def read_data():
-    with open(DATA_JSON) as json_file:
-        data = json.load(json_file)
-    # features = data['subject']
-    del data['subject']
-    subjects = list(data.keys())
-    return data, subjects
+# def read_data():
+#     with open(DATA_JSON) as json_file:
+#         data = json.load(json_file)
+#     # features = data['subject']
+#     del data['subject']
+#     subjects = list(data.keys())
+#     return data, subjects
 
 
 def get_features():
@@ -264,19 +264,19 @@ def load_data_wval(s):
     return x_train, x_val, x_test, y_train, y_val, y_test
     
 
-def load_data_nval(s):
-    ''' Loads datasets for a subject s (train, test)'''
-    path = DATA_SPLIT + 'n-val/'
-    x_train = np.load(path + s + '/x_train.npy')
-    x_test  = np.load(path + s + '/x_test.npy')
-    y_train = np.load(path + s + '/y_train.npy')
-    y_test  = np.load(path + s + '/y_test.npy')
-    return x_train, x_test, y_train, y_test
+# def load_data_nval(s):
+#     ''' Loads datasets for a subject s (train, test)'''
+#     path = DATA_SPLIT + 'n-val/'
+#     x_train = np.load(path + s + '/x_train.npy')
+#     x_test  = np.load(path + s + '/x_test.npy')
+#     y_train = np.load(path + s + '/y_train.npy')
+#     y_test  = np.load(path + s + '/y_test.npy')
+#     return x_train, x_test, y_train, y_test
 
 
-def load_model(name, s):
-    ''' Returns the corresponding model for a subject '''
-    return load('models/' + name + '/' + s + '.joblib')
+# def load_model(name, s):
+#     ''' Returns the corresponding model for a subject '''
+#     return load('models/' + name + '/' + s + '.joblib')
 
 
 
@@ -400,24 +400,24 @@ def visualize_tree(clf, s):
 ###############################################################
 
 
-def svm_training():
-    ''' Calculates and saves the best hyperparameteres for each subject's SVM model '''
-    _, subjects = read_data()
+# def svm_training():
+#     ''' Calculates and saves the best hyperparameteres for each subject's SVM model '''
+#     _, subjects = read_data()
 
-    kernel = ["linear","rbf","poly"]
-    C = [i for i in range(1,1000,10)]
-    degree = [1,2]
+#     kernel = ["linear","rbf","poly"]
+#     C = [i for i in range(1,1000,10)]
+#     degree = [1,2]
 
-    hyperparameteres = dict(kernel=kernel, C=C, degree=degree)
+#     hyperparameteres = dict(kernel=kernel, C=C, degree=degree)
     
-    for s in subjects:
-        x_train, _, y_train, _= load_data_nval(s)
+#     for s in subjects:
+#         x_train, _, y_train, _= load_data_nval(s)
 
-        svm_tune = SVC(gamma ='auto',decision_function_shape='ovo')
-        clf = GridSearchCV(svm_tune, hyperparameteres, scoring='f1', n_jobs=-1)
-        clf.fit(x_train, y_train)
+#         svm_tune = SVC(gamma ='auto',decision_function_shape='ovo')
+#         clf = GridSearchCV(svm_tune, hyperparameteres, scoring='f1', n_jobs=-1)
+#         clf.fit(x_train, y_train)
 
-        dump(clf, MODELS_SVM + s + '.joblib')
+#         dump(clf, MODELS_SVM + s + '.joblib')
 
 
 

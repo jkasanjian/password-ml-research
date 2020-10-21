@@ -1,6 +1,6 @@
-from os import path, mkdir
 import json
 import numpy as np
+from os import path, mkdir
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 
