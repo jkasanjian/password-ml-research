@@ -298,23 +298,23 @@ def shuffle(x, y):
 # ---------------------------- KNN ----------------------------
 ###############################################################
 
-def knn_training():
-    ''' Calculates and saves the best hyperparameteres for each subject's KNN model '''
-    _, subjects = read_data()
+# def knn_training():
+#     ''' Calculates and saves the best hyperparameteres for each subject's KNN model '''
+#     _, subjects = read_data()
 
-    leaf_size = list(range(1,50))
-    n_neighbors = list(range(1,30))
-    p = [1,2]
-    hyperparameters = dict(leaf_size=leaf_size, n_neighbors=n_neighbors, p=p)
+#     leaf_size = list(range(1,50))
+#     n_neighbors = list(range(1,30))
+#     p = [1,2]
+#     hyperparameters = dict(leaf_size=leaf_size, n_neighbors=n_neighbors, p=p)
 
-    for s in subjects:
-        x_train, _, y_train, _ = load_data_nval(s)
+#     for s in subjects:
+#         x_train, _, y_train, _ = load_data_nval(s)
 
-        knn_tune = KNeighborsClassifier(algorithm='brute', metric='minkowski')
-        clf = GridSearchCV(knn_tune, hyperparameters, scoring='f1', n_jobs=-1)
-        clf.fit(x_train, y_train)
+#         knn_tune = KNeighborsClassifier(algorithm='brute', metric='minkowski')
+#         clf = GridSearchCV(knn_tune, hyperparameters, scoring='f1', n_jobs=-1)
+#         clf.fit(x_train, y_train)
 
-        dump(clf, MODELS_KNN + s + '.joblib')
+#         dump(clf, MODELS_KNN + s + '.joblib')
         
 
 
@@ -323,25 +323,25 @@ def knn_training():
 # ---------------------------- Logistic Regression ----------------------------
 ###############################################################################
 
-def log_reg_training():
-    '''' Calculates and saves the best hyperparameteres for each subject's
-    Logistic Regression model '''
-    _, subjects = read_data()
+# def log_reg_training():
+#     '''' Calculates and saves the best hyperparameteres for each subject's
+#     Logistic Regression model '''
+#     _, subjects = read_data()
     
-    penalty = ['l1', 'l2', 'elasticnet', 'none']
-    C = np.logspace(-4, 4, 20)
-    solver = ['lbfgs','newton-cg','liblinear','sag','saga']
-    max_iter = [100, 1000, 2500, 5000]
-    hyperparameteres = dict(penalty=penalty, C=C, solver=solver, max_iter=max_iter)
+#     penalty = ['l1', 'l2', 'elasticnet', 'none']
+#     C = np.logspace(-4, 4, 20)
+#     solver = ['lbfgs','newton-cg','liblinear','sag','saga']
+#     max_iter = [100, 1000, 2500, 5000]
+#     hyperparameteres = dict(penalty=penalty, C=C, solver=solver, max_iter=max_iter)
 
-    for s in subjects:
-        x_train, _, y_train, _ = load_data_nval(s)
+#     for s in subjects:
+#         x_train, _, y_train, _ = load_data_nval(s)
         
-        log_tune = LogisticRegression()
-        clf = GridSearchCV(log_tune, hyperparameteres, scoring='f1', n_jobs=-1)
-        clf.fit(x_train, y_train)
+#         log_tune = LogisticRegression()
+#         clf = GridSearchCV(log_tune, hyperparameteres, scoring='f1', n_jobs=-1)
+#         clf.fit(x_train, y_train)
        
-        dump(clf, MODELS_LOGIT + s + '.joblib')
+#         dump(clf, MODELS_LOGIT + s + '.joblib')
 
 
 
@@ -349,49 +349,49 @@ def log_reg_training():
 # ---------------------------- Random Forest ----------------------------
 #########################################################################
 
-def random_forest_training():
-    ''' Generates a Random Forest regression model for each subject'''
-    _, subjects = read_data()
+# def random_forest_training():
+#     ''' Generates a Random Forest regression model for each subject'''
+#     _, subjects = read_data()
    
-    n_estimators = [int(x) for x in np.linspace(start=200, stop=2000, num=10)]
-    max_features = ['auto', 'sqrt']
-    max_depth = list(range(50, 100, 10))
-    max_depth.append(None)
-    min_samples_split = [2, 5, 10]
-    min_samples_leaf = [1, 2, 4]
-    bootstrap = [True, False]
-    hyperparameteres = dict(
-                n_estimators=n_estimators,
-                max_features=max_features,
-                max_depth=max_depth,
-                min_samples_split=min_samples_split,
-                min_samples_leaf=min_samples_leaf,
-                bootstrap=bootstrap)
+#     n_estimators = [int(x) for x in np.linspace(start=200, stop=2000, num=10)]
+#     max_features = ['auto', 'sqrt']
+#     max_depth = list(range(50, 100, 10))
+#     max_depth.append(None)
+#     min_samples_split = [2, 5, 10]
+#     min_samples_leaf = [1, 2, 4]
+#     bootstrap = [True, False]
+#     hyperparameteres = dict(
+#                 n_estimators=n_estimators,
+#                 max_features=max_features,
+#                 max_depth=max_depth,
+#                 min_samples_split=min_samples_split,
+#                 min_samples_leaf=min_samples_leaf,
+#                 bootstrap=bootstrap)
 
-    for s in subjects:
-        x_train, _, y_train, _ = load_data_nval(s) 
+#     for s in subjects:
+#         x_train, _, y_train, _ = load_data_nval(s) 
 
-        rf_tune = RandomForestClassifier()
-        clf = GridSearchCV(rf_tune, hyperparameteres, scoring='f1', n_jobs= -1)
-        clf.fit(x_train, y_train)
+#         rf_tune = RandomForestClassifier()
+#         clf = GridSearchCV(rf_tune, hyperparameteres, scoring='f1', n_jobs= -1)
+#         clf.fit(x_train, y_train)
         
-        dump(clf, MODELS_RF + s + '.joblib')
-        # vizualize_tree(clf, s)
+#         dump(clf, MODELS_RF + s + '.joblib')
+#         # vizualize_tree(clf, s)
 
 
-def visualize_tree(clf, s):
-    ''' Creates a graphics diagram of a tree from the random forest '''
-    estimator = clf.estimators_[5]
+# def visualize_tree(clf, s):
+#     ''' Creates a graphics diagram of a tree from the random forest '''
+#     estimator = clf.estimators_[5]
 
-    export_graphviz(estimator, out_file=TREE_GRAPHS+s+'tree.dot', 
-                feature_names = get_features(),
-                class_names = ['genuine user', 'imposter'],
-                rounded = True, proportion = False, 
-                precision = 2, filled = True)
+#     export_graphviz(estimator, out_file=TREE_GRAPHS+s+'tree.dot', 
+#                 feature_names = get_features(),
+#                 class_names = ['genuine user', 'imposter'],
+#                 rounded = True, proportion = False, 
+#                 precision = 2, filled = True)
 
-    check_call(['dot', '-Tpng', TREE_GRAPHS+s+'tree.dot', '-o', TREE_GRAPHS+s+'tree.png', '-Gdpi=600'])
-    Image(filename=TREE_GRAPHS+s+'tree.png')
-    remove(TREE_GRAPHS+s+'tree.dot')
+#     check_call(['dot', '-Tpng', TREE_GRAPHS+s+'tree.dot', '-o', TREE_GRAPHS+s+'tree.png', '-Gdpi=600'])
+#     Image(filename=TREE_GRAPHS+s+'tree.png')
+#     remove(TREE_GRAPHS+s+'tree.dot')
 
 
 

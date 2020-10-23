@@ -1,7 +1,8 @@
-from os import path, mkdir
 import numpy as np
 import json
+import os
 from joblib import dump, load
+
 
 DATA_JSON = 'data/password_data.json'
 
@@ -13,10 +14,14 @@ def read_data():
     subjects = list(data.keys())
     return data, subjects
 
+def directoryExist(name):
+    if not os.path.isdir(name):
+        os.makedirs(name)
+
 
 def load_model(name, s):
     ''' Returns the corresponding model for a subject '''
-    return load('/Desktop/password-ml-research/src/models/all_data/' + s + "/" + name + ".joblib")
+    return load('src/models/all_data/' + s + "/" + name + ".joblib")
 
 
 def get_test_data(subject, is_balanced):
@@ -49,8 +54,6 @@ def get_train_data(subject, is_balanced):
     y_train = np.load(path + subject + '/y_train.npy')
 
     return x_train, y_train
-
-
 
 
 
