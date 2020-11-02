@@ -61,8 +61,8 @@ class RF_Model:
             clf = GridSearchCV(rf_clf, hyperparameters, scoring='f1', n_jobs= -1)
             clf.fit(X_train, Y_train)
             directoryExist(MODELS_RF + s)
-            # if not os.path.isdir(MODELS_RF + s):
-            #     os.makedirs(MODELS_RF + s)
+            if not os.path.isdir(MODELS_RF + s):
+                os.makedirs(MODELS_RF + s)
             dump(clf, MODELS_RF + s + '/RF.joblib')
 
 
@@ -91,8 +91,8 @@ class RF_Model:
             clf = GridSearchCV(ab_clf, hyperparameters, scoring='f1', n_jobs= -1)
             clf.fit(X_train, Y_train)
             directoryExist(MODELS_RF + s)
-            # if not os.path.isdir(MODELS_RF + s):
-            #     os.makedirs(MODELS_RF + s)
+            if not os.path.isdir(MODELS_RF + s):
+                os.makedirs(MODELS_RF + s)
             dump(clf, MODELS_RF + s + '/Adaboost_RF.joblib')
       
 
