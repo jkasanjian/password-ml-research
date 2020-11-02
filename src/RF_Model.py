@@ -145,7 +145,7 @@ if __name__ == "__main__":
     RF = RF_Model()
     RF.RF_training()
     X_test, Y_test = get_test_data("s037",True)
-    # model = load_model("RF","s037")
+    model = load_model("RF","s037")
     # Y_pred = model.predict(X_test)
     # print("Accuracy:",metrics.accuracy_score(Y_test, Y_pred))
     # print('RF done training')
