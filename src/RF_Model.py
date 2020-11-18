@@ -9,7 +9,7 @@ from sklearn.ensemble import BaggingClassifier
 from IPython.display import Image
 from sklearn.tree import export_graphviz
 from subprocess import check_call
-from Helper import get_results, get_test_data, get_train_data, read_data, load_model, directoryExist, get_results
+from Helper import get_results, get_train_data, read_data, directoryExist, get_results
 
 
 DATA_SPLIT = 'data/split/'
@@ -36,9 +36,9 @@ class RF_Model:
     
     def startTesting(self):
         model_names = ["RF","Adaboost_RF","Bagging_RF"]
-        # for i in model_names:
-        get_results(RF.subjects,model_names[2],"RF")
-
+        for i in model_names:
+            get_results(RF.subjects,i,"RF")
+    
     
     #Generates a Random Forest regression model for each subject
     def rf_training(self, all_data = True): 
@@ -65,10 +65,8 @@ class RF_Model:
             clf = GridSearchCV(rf_clf, hyperparameters, scoring='f1', n_jobs= -1)
             clf.fit(X_train, Y_train)
             directoryExist(MODELS_RF + s)
-            if not os.path.isdir(MODELS_RF + s):
-                os.makedirs(MODELS_RF + s)
             dump(clf, MODELS_RF + s + '/RF.joblib')
-            print("Finished:",s[2:])
+                
 
 
         
@@ -80,8 +78,6 @@ class RF_Model:
             ada_clf = AdaBoostClassifier(rf_clf, n_estimators = 20, learning_rate = 1)
             ada_clf.fit(X_train,Y_train)
             directoryExist(MODELS_RF + s)
-            if not os.path.isdir(MODELS_RF + s):
-                os.makedirs(MODELS_RF + s)
             dump(ada_clf, MODELS_RF + s + '/Adaboost_RF.joblib')
             print(s,"Finished")
       
@@ -117,7 +113,7 @@ class RF_Model:
 
 if __name__ == "__main__":
     RF = RF_Model()
-    # RF.startTraining(False,False,True)
+    # RF.startTraining(True,False,False)
     RF.startTesting()
 
 
