@@ -23,11 +23,11 @@ class LOG_Model:
 
     def startTraining(self,reg = True, ada = False, Bagging = False):
         if(reg):
-            log_training()
+            self.log_training()
         if(ada):
-            log_training_with_adaBoost()
+            self.log_training_with_adaBoost()
         if(Bagging):
-            log_training_with_Bagging()
+            self.log_training_with_Bagging()
     
     def startTesting(self):
         #TODO begin testing here
@@ -57,9 +57,7 @@ class LOG_Model:
         X_train, Y_train = get_train_data(self.subjects[0],all_data)
         log_tune = LogisticRegression()
         clf = GridSearchCV(log_tune, hyperparameters, scoring='f1', n_jobs=-1)
-        print("GGGGGGGGGGGGGG GGGGGGGGGGGGGG GGGGGGGGGGGGGG GGGGGGGGGGGGGG GGGGGGGGGGGGGG ")
         clf.fit(X_train, Y_train)
-        print("GGGGGGGGGGGGGG GGGGGGGGGGGGGG GGGGGGGGGGGGGG GGGGGGGGGGGGGG GGGGGGGGGGGGGG ")
         if not os.path.isdir(MODELS_LOG + self.subjects[0]):
             os.makedirs(MODELS_LOG + self.subjects[0])
         dump(clf, MODELS_LOG + self.subjects[0] + '/LOG.joblib')
@@ -68,20 +66,13 @@ class LOG_Model:
         
     def log_training_with_adaBoost(self, all_data = True):
 
-        penalty = ['l1', 'l2', 'elasticnet', 'none']
-        C = np.logspace(-4, 4, 20)
-        solver = ['lbfgs','newton-cg','liblinear','sag','saga']
-        max_iter = [100, 1000, 2500, 5000]
-        hyperparameters = dict(penalty=penalty, C=C, solver=solver, max_iter=max_iter)
-
         for s in self.subjects:
             X_train, Y_train = get_train_data(s,all_data)
-            b_clf = AdaBoostClassifier(LogisticRegression())
-            clf = GridSearchCV(b_clf, hyperparameters, scoring='f1', n_jobs=-1)
-            clf.fit(X_train, Y_train)
+            ada_clf = AdaBoostClassifier(LogisticRegression(tol =.001),n_estimators=10,learning_rate=1)
+            ada_clf.fit(X_train, Y_train)
             if not os.path.isdir(MODELS_LOG + s):
                 os.makedirs(MODELS_LOG + s)
-            dump(clf, MODELS_LOG + s + '/Adaboost_LOG.joblib')
+            dump(ada_clf, MODELS_LOG + s + '/Adaboost_LOG.joblib')
 
         
 
@@ -107,7 +98,7 @@ class LOG_Model:
 if __name__ == "__main__":
 
     LOG = LOG_Model()
-    LOG.log_training()
+    LOG.log_training(False,True,False)
 
     # X_test, Y_test = get_test_data("s037",True)
     # model = load_model("LOG","s037")
