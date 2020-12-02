@@ -76,15 +76,17 @@ def get_results(subjects, model_name, model_type):
         #### 
 
         X_test, Y_test = get_test_data(s,True)
-        model = load_model(model_name,s)
-        Y_pred = model.predict(X_test)
 
+        model = load_model(model_name,s)
+        X_test = X_test.astype(np.float)
+        Y_test = Y_test.astype(np.float)
+        Y_pred = model.predict(X_test)
+        
         s_results = {}
         n = len(Y_test)
         miss = 0
         f_a = 0
         total_pos = 0
-
         for i in range(n):
 
             if Y_test[i] == 1.0:

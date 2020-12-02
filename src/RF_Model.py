@@ -2,7 +2,7 @@
 import os
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from joblib import dump, load
+from joblib import dump
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.ensemble import BaggingClassifier
@@ -35,7 +35,7 @@ class RF_Model:
     
     
     def startTesting(self):
-        model_names = ["RF","Adaboost_RF","Bagging_RF"]
+        model_names = ["Adaboost_RF","Bagging_RF"]
         for i in model_names:
             get_results(RF.subjects,i,"RF")
     
@@ -61,6 +61,8 @@ class RF_Model:
 
         for s in self.subjects:
             X_train, Y_train = get_train_data(s,all_data)
+            X_train = X_train.astype(np.float)
+            Y_train = Y_train.astype(np.float)
             rf_clf = RandomForestClassifier()
             clf = GridSearchCV(rf_clf, hyperparameters, scoring='f1', n_jobs= -1)
             clf.fit(X_train, Y_train)
@@ -74,6 +76,8 @@ class RF_Model:
 
         for s in self.subjects:
             X_train, Y_train = get_train_data(s,all_data)
+            X_train = X_train.astype(np.float)
+            Y_train = Y_train.astype(np.float)
             rf_clf = RandomForestClassifier(n_estimators = 60, max_depth = 10, criterion =  "gini")
             ada_clf = AdaBoostClassifier(rf_clf, n_estimators = 20, learning_rate = 1)
             ada_clf.fit(X_train,Y_train)
@@ -87,10 +91,12 @@ class RF_Model:
         _, subjects = read_data()
         for s in self.subjects:
             X_train, Y_train = get_train_data(s,all_data)
+            X_train = X_train.astype(np.float)
+            Y_train = Y_train.astype(np.float)
             bagging_clf = BaggingClassifier(RandomForestClassifier(n_estimators = 60, max_depth = 10, criterion =  "gini"),n_estimators=10)
             bagging_clf.fit(X_train, Y_train)
             directoryExist(MODELS_RF + s)
-            print("Finished:",s[2:])
+            # print("Finished:",s[2:])
             dump(bagging_clf, MODELS_RF + s + '/Bagging_RF.joblib')
 
 
@@ -113,7 +119,7 @@ class RF_Model:
 
 if __name__ == "__main__":
     RF = RF_Model()
-    # RF.startTraining(True,False,False)
+    # RF.startTraining(False,True,True)
     RF.startTesting()
 
 
