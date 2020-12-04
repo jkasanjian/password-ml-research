@@ -42,7 +42,7 @@ class SVM_Model:
         for s in self.subjects:
 
             X_train, Y_train = get_train_data(s,all_data)
-            svm_clf = SVC(gamma ='auto',decision_function_shape='ovo')
+            svm_clf = SVC(gamma ='auto',decision_function_shape='ovo', pe)
             clf = GridSearchCV(svm_clf, hyperparameters, scoring='f1', n_jobs=-1)
             clf.fit(X_train, Y_train)
             if not os.path.isdir(MODELS_SVM + s):

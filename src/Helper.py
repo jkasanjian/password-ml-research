@@ -134,7 +134,7 @@ def get_results(subjects, model_name, model_type):
     results['auc SD'] = np.array(all_AUROC_scores).std()
     results['f1 mean'] = np.array(all_f1s).mean()
     results['f1 SD'] = np.array(all_f1s).std()
-    printResults(results)
+    # printResults(results)
 
 
 def printResults(results):

@@ -4,11 +4,10 @@ from sklearn import metrics
 import os
 import numpy as np
 from sklearn.linear_model import LogisticRegression
-from joblib import dump, load
+from joblib import dump
 from sklearn.model_selection import GridSearchCV
-from sklearn.ensemble import GradientBoostingClassifier
 from logitboost import LogitBoost
-from sklearn.ensemble import BaggingClassifier
+from sklearn.ensemble import BaggingClassifier, AdaBoostClassifier
 from Helper import directoryExist, get_train_data, read_data, get_results, get_test_data
 
 DATA_SPLIT = 'data/split/'
@@ -22,20 +21,20 @@ class LOG_Model:
     def __init__(self, balanced = False):
         _, self.subjects = read_data()
 
-    def startTraining(self,reg = True, ada = False, Bagging = False):
+    def startTraining(self,reg = True, logit = False, ada = False, Bagging = False):
         if(reg):
             self.log_training()
-        if(ada):
+        if(logit):
             self.log_training_with_LogitBoost()
+        if(ada):
+            self.log_training_with_Adaboost()
         if(Bagging):
             self.log_training_with_Bagging()
     
     def startTesting(self):
-        #TODO begin testing here
-        model_names = ["LOG","LBoost_LOG"]
+        model_names = ["Adaboost_LOG","LBoost_LOG", "Bagging_LOG"]
         for i in model_names:
             get_results(LOG.subjects,i,"LOG")
-        print()
 
 
     def log_training(self, all_data = True): 
@@ -54,9 +53,21 @@ class LOG_Model:
             grid_clf.fit(X_train, Y_train)
             directoryExist(MODELS_LOG + s)
             dump(grid_clf, MODELS_LOG + s + '/LOG.joblib')
+            print("done",s)
 
 
-    ##MIGHT IMPLEMENT ADA BOOST
+    def log_training_with_Adaboost(self,all_data = True):
+        
+        for s in self.subjects:
+            X_train, Y_train = get_train_data(s,all_data)
+            X_train = X_train.astype(np.float)
+            Y_train = Y_train.astype(np.float)
+            ab_clf = AdaBoostClassifier(LogisticRegression(tol =.001),n_estimators= 100)
+            ab_clf.fit(X_train, Y_train)
+            directoryExist(MODELS_LOG + s)
+            dump(ab_clf, MODELS_LOG + s + '/Adaboost_LOG.joblib')
+            print("done",s)
+
         
     def log_training_with_LogitBoost(self, all_data = True):
 
@@ -68,6 +79,8 @@ class LOG_Model:
             lb_clf.fit(X_train, Y_train)
             directoryExist(MODELS_LOG + s)
             dump(lb_clf, MODELS_LOG + s + '/LBoost_LOG.joblib')
+            print("done",s)
+            
 
         
 
@@ -81,13 +94,13 @@ class LOG_Model:
             bagging_clf.fit(X_train, Y_train)
             directoryExist(MODELS_LOG + s)
             dump(bagging_clf, MODELS_LOG + s + '/Bagging_LOG.joblib')
+            print("done",s)
 
 
 if __name__ == "__main__":
 
     LOG = LOG_Model()
-
-    #LOG.startTraining(False,True,False)
+    LOG.startTraining(True,False,False,False)
     LOG.startTesting()
 
    
