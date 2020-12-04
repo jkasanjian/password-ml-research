@@ -41,9 +41,10 @@ class LOG_Model:
     #Calculates and saves the best hyperparameters for each subject's
     #Logistic Regression model
         penalty = ['l1', 'l2', 'elasticnet', 'none']
-        C = np.logspace(-4, 4, 20)
+        C = [.001, .01, .1, 1, 10, 100, 500, 1000]
         solver = ['lbfgs','newton-cg','liblinear','sag','saga']
         max_iter = [100, 1000, 2500, 5000]
+
         hyperparameters = dict(penalty=penalty, C=C, solver=solver, max_iter=max_iter)
 
         for s in self.subjects:
