@@ -12,3 +12,4 @@ scipy==1.5.2
 six==1.15.0
 sklearn==0.0
 threadpoolctl==2.1.0
+logitboost==0.7
