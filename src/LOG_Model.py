@@ -26,13 +26,13 @@ class LOG_Model:
         if(reg):
             self.log_training()
         if(ada):
-            self.log_training_with_adaBoost()
+            self.log_training_with_LogitBoost()
         if(Bagging):
             self.log_training_with_Bagging()
     
     def startTesting(self):
         #TODO begin testing here
-        model_names = ["LBoost_LOG"]
+        model_names = ["LOG","LBoost_LOG"]
         for i in model_names:
             get_results(LOG.subjects,i,"LOG")
         print()
@@ -56,9 +56,9 @@ class LOG_Model:
             dump(grid_clf, MODELS_LOG + s + '/LOG.joblib')
 
 
-
+    ##MIGHT IMPLEMENT ADA BOOST
         
-    def log_training_with_adaBoost(self, all_data = True):
+    def log_training_with_LogitBoost(self, all_data = True):
 
         for s in self.subjects:
             X_train, Y_train = get_train_data(s,all_data)
@@ -86,21 +86,8 @@ class LOG_Model:
 if __name__ == "__main__":
 
     LOG = LOG_Model()
-    LOG.startTraining(False,True,False)
+
+    #LOG.startTraining(False,True,False)
     LOG.startTesting()
 
-    # X_test, Y_test = get_test_data("s037",True)
-    # model = load_model("LOG","s037")
-    # Y_pred = model.predict(X_test)
-    # print("Accuracy:",metrics.accuracy_score(Y_test, Y_pred))
-    # print('LOG done training')
-    # X_test, Y_test = get_test_data("s055",True)
-    # model = load_model("LOG","s055")
-    # Y_pred = model.predict(X_test)
-    # print("Accuracy:",metrics.accuracy_score(Y_test, Y_pred))
-    # print('LOG done training')
-    # X_test, Y_test = get_test_data("s050",True)
-    # model = load_model("LOG","s030")
-    # Y_pred = model.predict(X_test)
-    # print("Accuracy:",metrics.accuracy_score(Y_test, Y_pred))
-    # print('LOG done training')
+   

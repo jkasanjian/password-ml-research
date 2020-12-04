@@ -35,7 +35,7 @@ class RF_Model:
     
     
     def startTesting(self):
-        model_names = ["Adaboost_RF","Bagging_RF"]
+        model_names = ["RF","Adaboost_RF","Bagging_RF"]
         for i in model_names:
             get_results(RF.subjects,i,"RF")
     
