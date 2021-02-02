@@ -1,0 +1,38 @@
+{
+    "model" : {
+        "model_variation" : {
+            "pca_on" : {
+                "FAR mean" : 0,
+                "FAR sd" : 0,
+                "FRR mean" : 0,
+                "FRR sd" : 0,
+                "Precision mean" : 0,
+                "Precision sd" : 0,
+                "Recall mean" : 0,
+                "Recall sd" : 0,
+                "AUC mean" : 0,
+                "AUC sd" : 0,
+                "F1 mean": 0,
+                "F1 sd" : 0,
+                "avg train time" : 0,
+                "avg test time" : 0
+            },
+            "pca_off" : {
+                "FAR mean" : 0,
+                "FAR sd" : 0,
+                "FRR mean" : 0,
+                "FRR sd" : 0,
+                "Precision mean" : 0,
+                "Precision sd" : 0,
+                "Recall mean" : 0,
+                "Recall sd" : 0,
+                "AUC mean" : 0,
+                "AUC sd" : 0,
+                "F1 mean": 0,
+                "F1 sd" : 0,
+                "avg train time" : 0,
+                "avg test time" : 0
+            }
+        }
+    }
+}
