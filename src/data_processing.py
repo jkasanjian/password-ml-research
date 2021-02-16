@@ -160,11 +160,11 @@ def partition_data_ratio(pos_ratio):
 if __name__ == "__main__":
     """ Main method """
     ratios = [10, 20, 30, 40, 60, 70, 80, 90]
-    # for r in ratios:
-    #     partition_data_ratio(r)
-    pca_data_all()
-    for r in ratios: 
-        pca_data_pos_ratios(r)
+    for r in ratios:
+        partition_data_ratio(r)
+    # pca_data_all()
+    # for r in ratios: 
+    #     pca_data_pos_ratios(r)
 
     print("----------FINISHED EXECUTION----------")
 

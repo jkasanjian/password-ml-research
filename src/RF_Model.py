@@ -39,7 +39,7 @@ class RF_Model:
             self.rf_training_with_Bagging(pca = pca, ratio = ratio, all_data = False)
 
     def startTesting(self, pca = False, all_data = False, ratio = "10"):
-        model_names = ["Adaboost_RF", "Bagging_RF","RF"]
+        model_names = ["Adaboost_RF", "Bagging_RF"]
         for i in model_names:
             get_results(self.subjects, i, "RF",pca, all_data , ratio)
 
@@ -187,7 +187,8 @@ class RF_Model:
 
 if __name__ == "__main__":
     RF = RF_Model()
-    ratios = [10, 20, 30, 40, 60, 70, 80, 90]
+    ratios = [40, 60, 70, 80, 90]
     for r in ratios:
-        RF.startTraining(True, True, True, all_data = True, ratio = str(r))
+        print("Starting training for ratio-",r)
+        RF.startTraining(False, True, True, True, ratio = str(r))
         RF.startTesting(pca = True, all_data = False, ratio = str(r))

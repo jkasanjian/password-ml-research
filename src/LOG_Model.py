@@ -42,7 +42,7 @@ class LOG_Model:
     def startTesting(self,pca = False,all_data = False, ratio = "10"):
         model_names = ["Adaboost_LOG", "Bagging_LOG","LBoost_LOG"]
         for i in model_names:
-            get_results(self.subjects, i, "LOG", pca, all_data, ratio)
+            get_results(self.subjects, i, "LOG", pca = pca, all_data = all_data, ratio = ratio)
     
 
     def log_training_gridSearch(self, all_data=False,pca = False, ratio = "10"):
@@ -100,7 +100,7 @@ class LOG_Model:
         print("~~~~~~~~~~Starting Adaboost~~~~~~~~~~")
 
         for s in self.subjects:
-            X_train, Y_train = get_train_data(s, all_data , pca, ratio = ratio )
+            X_train, Y_train = get_train_data(s, all_data , pca, ratio = ratio)
             X_train = X_train.astype(np.float)
             Y_train = Y_train.astype(np.float)
             ab_clf = AdaBoostClassifier(LogisticRegression(), n_estimators=100)
@@ -195,7 +195,13 @@ class LOG_Model:
 
 if __name__ == "__main__":
     LOG = LOG_Model()
-    ratios = [10,20,30,40,60,70, 80, 90]
+    ratios = [10,20,30,40,60,70,80,90]
+    # for r in ratios:
+    #     LOG.startTraining(False, True, True, True, ratio = str(r), pca = True)
+    #     LOG.startTesting (all_data = False, ratio = str(r), pca = True)
+
+
     for r in ratios:
+        
         LOG.startTraining(False, True, True, True, ratio = str(r), pca = False)
         LOG.startTesting (all_data = False, ratio = str(r), pca = False)

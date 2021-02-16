@@ -144,7 +144,7 @@ def get_results(subjects, model_name, model_type,pca,all_data,ratio):
             path += model_name + p + "_PNG/"
             
         else:
-            X_test, Y_test = get_test_data(s, False, pca)
+            X_test, Y_test = get_test_data(s, False, pca, ratio = ratio)
             path = "./models/pos-" + ratio + "/" + s + "/graphs/"
             directoryExist(path)
             path += model_name + p + "_PNG"
@@ -193,9 +193,9 @@ def get_results(subjects, model_name, model_type,pca,all_data,ratio):
         s_results["auc"] = auc_score
         all_AUROC_scores.append(auc_score)
         results["subjects"][s] = s_results
-        printUserResults(s,miss_rate,false_alarm_rate, precision, recall, f1, auc_score)
-        print("Accuracy:", metrics.accuracy_score(Y_pred, Y_test))
-        print("F1:",metrics.f1_score(Y_pred,Y_test))
+        # printUserResults(s,miss_rate,false_alarm_rate, precision, recall, f1, auc_score)
+        # print("Accuracy:", metrics.accuracy_score(Y_pred, Y_test))
+        # print("F1:",metrics.f1_score(Y_pred,Y_test))
 
     results["false acceptance rate mean"] = np.array(all_miss_rate).mean()
     results["false acceptance rate SD"] = np.array(all_miss_rate).std()

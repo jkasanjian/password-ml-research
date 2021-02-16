@@ -32,7 +32,7 @@ class SVM_Model:
             self.svm_training_with_Bagging(pca = pca, ratio = ratio, all_data = False)
 
     def startTesting(self, pca = False, all_data = True, ratio = "10"):
-        model_names = [ "Adaboost_SVM", "Bagging_SVM", "SVM"]
+        model_names = [ "Adaboost_SVM", "Bagging_SVM"]
         for model in model_names:
             get_results(self.subjects, model, "SVM",pca, all_data, ratio)
 
