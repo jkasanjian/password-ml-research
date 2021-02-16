@@ -33,20 +33,20 @@ class AUROC:
 
     def printROC(self):
         model_fpr, model_tpr, thresholds = roc_curve(self.Y_test, self.model_probs)
-        # plt.plot(
-        #     model_fpr,
-        #     model_tpr,
-        #     marker=".",
-        #     label=self.path.split("/")[4][:-4]
-        #     + "(AUROC = %.3f)" % roc_auc_score(self.Y_test, self.model_probs),
-        # )
+        plt.plot(
+            model_fpr,
+            model_tpr,
+            marker=".",
+            label=self.path.split("/")[4][:-4]
+            + "(AUROC = %.3f)" % roc_auc_score(self.Y_test, self.model_probs),
+        )
 
-        # # Title
-        # plt.title("ROC Plot")
-        # # Axis Labels
-        # plt.xlabel("False Positive Rate")
-        # plt.ylabel("True Positive Rate")
-        # plt.legend()
-        # # plt.show()
-        # plt.savefig(self.path)
-        # plt.close()
+        # Title
+        plt.title("ROC Plot")
+        # Axis Labels
+        plt.xlabel("False Positive Rate")
+        plt.ylabel("True Positive Rate")
+        plt.legend()
+        # plt.show()
+        plt.savefig(self.path)
+        plt.close()

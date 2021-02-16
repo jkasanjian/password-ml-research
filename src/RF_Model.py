@@ -21,30 +21,31 @@ from time import perf_counter
 
 
 DATA_SPLIT = "data/split/"
-MODELS_RF = "src/models/all_data/"
-MODELS_RF_UB = "src/models/unbalanced_data/"
+MODELS_RF_ALL = "./models/all_data/"
+MODELS_RF_BAL= "./models/pos-"
 
 
 class RF_Model:
     def __init__(self, balanced=False):
         _, self.subjects = read_data()
 
-    def startTraining(self, reg=False, ada=False, Bagging=False):
+    def startTraining(self, grid=False, ada=False, Bagging=False, pca = False, ratio = "10"):
         print("\n\n\n--------------TRAINING RF--------------\n")
-        if reg:
-            self.rf_training()
+        if grid:
+            self.rf_training_with_gridSearch(pca = pca, ratio = ratio, all_data = False)
         if ada:
-            self.rf_training_with_adaBoost()
+            self.rf_training_with_adaBoost(pca = pca, ratio = ratio, all_data = False)
         if Bagging:
-            self.rf_training_with_Bagging()
+            self.rf_training_with_Bagging(pca = pca, ratio = ratio, all_data = False)
 
-    def startTesting(self):
-        model_names = ["RF", "Adaboost_RF", "Bagging_RF"]
+    def startTesting(self, pca = False, all_data = False, ratio = "10"):
+        model_names = ["Adaboost_RF", "Bagging_RF","RF"]
         for i in model_names:
-            get_results(self.subjects, i, "RF")
+            get_results(self.subjects, i, "RF",pca, all_data , ratio)
 
     # Generates a Random Forest regression model for each subject
-    def rf_training(self, all_data=True):
+    def rf_training_with_gridSearch(self, all_data=True,pca = False,ratio = "10"):
+        p = "" if pca == False else "_pca"
         time_data = []
 
         n_estimators = [int(x) for x in np.linspace(start=10, stop=300, num=10)]
@@ -64,7 +65,7 @@ class RF_Model:
         )
 
         for s in self.subjects:
-            X_train, Y_train = get_train_data(s, all_data)
+            X_train, Y_train = get_train_data(s, all_data,pca = False, ratio = "10")
             X_train = X_train.astype(np.float)
             Y_train = Y_train.astype(np.float)
             rf_clf = RandomForestClassifier()
@@ -74,19 +75,29 @@ class RF_Model:
             clf.fit(X_train, Y_train)
             end_time = perf_counter()
 
-            directoryExist(MODELS_RF + s)
-            total_time = end_time - start_time
-            time_data.append(total_time)
-            dump(clf, MODELS_RF + s + "/RF.joblib")
-            print("Finished training:", s)
+            if(all_data):
+                directoryExist(MODELS_RF_ALL + s)
+                total_time = end_time - start_time
+                time_data.append(total_time)
+                dump(clf, MODELS_RF_ALL + s + "/models/RF" + p + ".joblib")
+                print("Finished training:", s)
 
-        save_time_data("RF", "RF", "train", sum(time_data) / len(time_data))
+            else: 
+                directoryExist(MODELS_RF_BAL + ratio + "/"  + s + "/models/")
+                total_time = end_time - start_time
+                time_data.append(total_time)
+                dump(clf, MODELS_RF_BAL + ratio + "/" + s + "/models/RF" + p + ".joblib")
+                print("Finished training:", s)
 
-    def rf_training_with_adaBoost(self, all_data=True):
+        # save_time_data("RF", "RF", "train", sum(time_data) / len(time_data))
+
+    def rf_training_with_adaBoost(self, all_data=True,pca = False, ratio="10"):
         time_data = []
+        p = "" if pca == False else "_pca"
+
 
         for s in self.subjects:
-            X_train, Y_train = get_train_data(s, all_data)
+            X_train, Y_train = get_train_data(s, all_data,pca,ratio)
             X_train = X_train.astype(np.float)
             Y_train = Y_train.astype(np.float)
             rf_clf = RandomForestClassifier(
@@ -98,19 +109,31 @@ class RF_Model:
             ada_clf.fit(X_train, Y_train)
             end_time = perf_counter()
 
-            directoryExist(MODELS_RF + s)
-            total_time = end_time - start_time
-            time_data.append(total_time)
-            dump(ada_clf, MODELS_RF + s + "/Adaboost_RF.joblib")
-            print(s, "Finished")
+            if all_data:
 
-        save_time_data("RF", "Adaboost_RF", "train", sum(time_data) / len(time_data))
+                directoryExist(MODELS_RF_ALL + s)
+                total_time = end_time - start_time
+                time_data.append(total_time)
+                dump(ada_clf, MODELS_RF_ALL + s + "/models/Adaboost_RF" + p +".joblib")
+                print(s, "Finished")
 
-    def rf_training_with_Bagging(self, all_data=True):
+            else: 
+                directoryExist(MODELS_RF_BAL + ratio + "/"  + s + "/models/")
+                total_time = end_time - start_time
+                time_data.append(total_time)
+                dump(ada_clf, MODELS_RF_BAL + ratio + "/" + s + "/models/Adaboost_RF" + p +".joblib")
+                print(s, "Finished")
+
+
+
+        # save_time_data("RF", "Adaboost_RF", "train", sum(time_data) / len(time_data))
+
+    def rf_training_with_Bagging(self, all_data=True,pca = False, ratio = "10"):
         time_data = []
+        p = "" if pca == False else "_pca"
 
         for s in self.subjects:
-            X_train, Y_train = get_train_data(s, all_data)
+            X_train, Y_train = get_train_data(s, all_data,pca,ratio)
             X_train = X_train.astype(np.float)
             Y_train = Y_train.astype(np.float)
             bagging_clf = BaggingClassifier(
@@ -124,14 +147,26 @@ class RF_Model:
             bagging_clf.fit(X_train, Y_train)
             end_time = perf_counter()
 
-            directoryExist(MODELS_RF + s)
-            # print("Finished:",s[2:])
-            total_time = end_time - start_time
-            time_data.append(total_time)
-            dump(bagging_clf, MODELS_RF + s + "/Bagging_RF.joblib")
-            print("Finished training:", s)
+            if all_data: 
+                
+                directoryExist(MODELS_RF_ALL + s)
+                # print("Finished:",s[2:])
+                total_time = end_time - start_time
+                time_data.append(total_time)
+                dump(bagging_clf, MODELS_RF_ALL + s + "/models/Bagging_RF" + p+ ".joblib")
+                print("Finished training:", s)
 
-        save_time_data("RF", "Bagging_RF", "train", sum(time_data) / len(time_data))
+            else:
+                directoryExist(MODELS_RF_BAL + ratio + "/"  + s + "/models/")
+                # print("Finished:",s[2:])
+                total_time = end_time - start_time
+                time_data.append(total_time)
+                dump(bagging_clf, MODELS_RF_BAL + ratio + "/"  + s + "/models/Bagging_RF" + p+ ".joblib")
+                print("Finished training:", s)
+                
+            
+
+        # save_time_data("RF", "Bagging_RF", "train", sum(time_data) / len(time_data))
 
     # TODO finish implementing visual for each users tree
 
@@ -152,5 +187,7 @@ class RF_Model:
 
 if __name__ == "__main__":
     RF = RF_Model()
-    RF.startTraining(True, True, True)
-    RF.startTesting()
+    ratios = [10, 20, 30, 40, 60, 70, 80, 90]
+    for r in ratios:
+        RF.startTraining(True, True, True, all_data = True, ratio = str(r))
+        RF.startTesting(pca = True, all_data = False, ratio = str(r))

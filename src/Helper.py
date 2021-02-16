@@ -39,79 +39,88 @@ def directoryExist(name):
         os.makedirs(name)
 
 #Need to fix for balanced and unbalanced
-def load_model(name, s, pca):
+def load_model(name, s, pca, all_data = True, ratio = "10"):
     p = "_pca" if pca else ""
     """ Returns the corresponding model for a subject """
-    return load("models/all_data/" + s + "/models/" + name + p + ".joblib")
+    if all_data:
+        return load("models/all_data/" + s + "/models/" + name + p + ".joblib")
+    
+    else:
+        return load("models/pos-" + ratio + "/" +  s + "/models/" + name + p + ".joblib")
 
 
-def get_test_data(subject, is_balanced,pca):
+def get_test_data(subject, all_data,pca,ratio = "10"):
     """Returns the testing data partition for the given subject.
     is_balanced is a boolean field. if true, returns test data
     that is classed-balanced. if false, returns test data with
     the same class proportions as the entire dataset"""
 
-    if is_balanced:
-        path = "data/partitions/balanced_data/"
-        x_test = np.load(path + subject + "/x_pca_test.npy")
-        y_test = np.load(path + subject + "/y_pca_test.npy")
-        return x_test,y_test
-
-    elif is_balanced and pca:
-        path = "data/partitions/balanced_data/" 
+    if all_data:
+        path = "data/partitions/all_data/"
         x_test = np.load(path + subject + "/x_test.npy")
         y_test = np.load(path + subject + "/y_test.npy")
         return x_test,y_test
         
-    elif is_balanced == False and pca == False:
+
+    elif all_data and pca:
         path = "data/partitions/all_data/"
+        x_test = np.load(path + subject + "/x_pca_test.npy")
+        y_test = np.load(path + subject + "/y_pca_test.npy")
+        return x_test,y_test
+        
+        
+    elif all_data == False and pca == False:
+        path = "data/partitions/pos-" + ratio + "/" 
         x_test = np.load(path + subject + "/x_test.npy")
         y_test = np.load(path + subject + "/y_test.npy")
         return x_test,y_test
     
     else:
-        path = "data/partitions/all_data/"
+        path = "data/partitions/pos-" + ratio + "/"
         x_test = np.load(path + subject + "/x_pca_test.npy")
         y_test = np.load(path + subject + "/y_pca_test.npy")
         return x_test,y_test
+        
 
 
-def get_train_data(subject, is_balanced,pca):
+def get_train_data(subject, all_data,pca,ratio = "10"):
     """Returns the training data partition for the given subject.
     is_balanced is a boolean field. if true, returns train data
     that is classed-balanced. if false, returns train data with
     the same class proportions as the entire dataset"""
     
-    if is_balanced:
-        path = "data/partitions/balanced_data/"
+    if all_data:
+        path = "data/partitions/all_data/"
         x_test = np.load(path + subject + "/x_train.npy")
         y_test = np.load(path + subject + "/y_train.npy")
         return x_test,y_test
 
-    elif is_balanced and pca:
-        path = "data/partitions/balanced_data/" 
+
+    elif all_data and pca:
+        path = "data/partitions/all_data/"
         x_test = np.load(path + subject + "/x_pca_train.npy")
         y_test = np.load(path + subject + "/y_pca_train.npy")
         return x_test,y_test
         
-    elif is_balanced == False and pca == False:
-        path = "data/partitions/all_data/"
+        
+    elif all_data == False and pca == False:
+        path = "data/partitions/pos-" + ratio + "/"
         x_test = np.load(path + subject + "/x_train.npy")
         y_test = np.load(path + subject + "/y_train.npy")
         return x_test,y_test
     
     else:
-        path = "data/partitions/all_data/"
+        path = "data/partitions/pos-" + ratio + "/" 
         x_test = np.load(path + subject + "/x_pca_train.npy")
         y_test = np.load(path + subject + "/y_pca_train.npy")
         return x_test,y_test
-
+        
     
 
 
-def get_results(subjects, model_name, model_type,pca):
+def get_results(subjects, model_name, model_type,pca,all_data,ratio):
     time_data = []
-
+    p = "" if pca == False else "_pca"
     print("\n\n\n--------------TESTING " + model_name + "--------------\n")
 
     results = {}
@@ -128,13 +137,19 @@ def get_results(subjects, model_name, model_type,pca):
         # path = "./models/all_data/" + s + "/graphs/" + model_type + "_PNG/"
         # directoryExist(path)
         ####
+        if(all_data):
+            X_test, Y_test = get_test_data(s, True, pca)
+            path = "./models/all_data/" + s + "/graphs/"
+            directoryExist(path)
+            path += model_name + p + "_PNG/"
+            
+        else:
+            X_test, Y_test = get_test_data(s, False, pca)
+            path = "./models/pos-" + ratio + "/" + s + "/graphs/"
+            directoryExist(path)
+            path += model_name + p + "_PNG"
 
-        X_test, Y_test = get_test_data(s, False, pca)
-
-        model = load_model(model_name, s,True)
-        X_test = X_test.astype(np.float)
-        Y_test = Y_test.astype(np.float)
-
+        model = load_model(model_name, s, pca = pca, all_data = all_data, ratio = ratio)
         start_time = perf_counter()
         Y_pred = model.predict(X_test)
         end_time = perf_counter()
@@ -173,7 +188,7 @@ def get_results(subjects, model_name, model_type,pca):
         s_results["f1"] = f1
         all_f1s.append(f1)
         # charts = AUROC(model, model_name, X_test, Y_test)
-        charts = AUROC(model, model_name, X_test, Y_test)
+        charts = AUROC(model, path, X_test, Y_test)
         auc_score = charts.getAUC()
         s_results["auc"] = auc_score
         all_AUROC_scores.append(auc_score)

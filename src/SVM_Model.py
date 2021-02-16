@@ -14,29 +14,30 @@ from Helper import (
 from time import perf_counter
 
 DATA_SPLIT = "data/split/"
-MODELS_SVM = "src/models/all_data/"
-MODELS_SVM_UB = "src/models/unbalanced_data/"
+MODELS_SVM_ALL = "./models/all_data/"
+MODELS_SVM_BAL = "./models/pos-"
 
 
 class SVM_Model:
     def __init__(self, balanced=False):
         _, self.subjects = read_data()
 
-    def startTraining(self, reg=True, ada=False, Bagging=False):
+    def startTraining(self, reg=True, ada=False, Bagging=False, pca = False, ratio = "10"):
         print("\n\n\n--------------TRAINING SVM--------------\n")
         if reg:
-            self.svm_training()
+            self.svm_training(pca = pca, ratio = ratio, all_data = False)
         if ada:
-            self.svm_training_with_adaBoost()
+            self.svm_training_with_adaBoost(pca = pca, ratio = ratio, all_data = False)
         if Bagging:
-            self.svm_training_with_Bagging()
+            self.svm_training_with_Bagging(pca = pca, ratio = ratio, all_data = False)
 
-    def startTesting(self):
-        model_names = ["Adaboost_SVM", "Bagging_SVM", "SVM"]
+    def startTesting(self, pca = False, all_data = True, ratio = "10"):
+        model_names = [ "Adaboost_SVM", "Bagging_SVM", "SVM"]
         for model in model_names:
-            get_results(self.subjects, model, "SVM")
+            get_results(self.subjects, model, "SVM",pca, all_data, ratio)
 
-    def svm_training(self, all_data=True):
+    def svm_training(self, all_data=True, pca = False, ratio = "10"):
+        p = "" if pca == False else "_pca"
         time_data = []
 
         # SVM with gridsearch is still as optimal as bagging, bagging still optimizes even if its very low margins
@@ -47,7 +48,7 @@ class SVM_Model:
         hyperparameters = dict(kernel=kernel, C=C, degree=degree)
 
         for s in self.subjects:
-            X_train, Y_train = get_train_data(s, all_data)
+            X_train, Y_train = get_train_data(s, all_data,pca,ratio)
             svm_clf = SVC(gamma="auto", decision_function_shape="ovo", probability=True)
             clf = GridSearchCV(svm_clf, hyperparameters, scoring="f1", n_jobs=-1)
 
@@ -55,15 +56,24 @@ class SVM_Model:
             clf.fit(X_train, Y_train)
             end_time = perf_counter()
 
-            directoryExist(MODELS_SVM + s)
-            total_time = end_time - start_time
-            time_data.append(total_time)
-            dump(clf, MODELS_SVM + s + "/SVM.joblib")
-            print("Finished training:", s)
+            if all_data:
+                directoryExist(MODELS_SVM_ALL + s)
+                total_time = end_time - start_time
+                time_data.append(total_time)
+                dump(clf, MODELS_SVM_ALL + s + "/models/SVM" + p + ".joblib")
+                print("Finished training:", s)
 
-        save_time_data("SVM", "SVM", "train", sum(time_data) / len(time_data))
+            else: 
+                directoryExist(MODELS_SVM_BAL + s)
+                total_time = end_time - start_time
+                time_data.append(total_time)
+                dump(clf, MODELS_SVM_BAL + ratio + "/" + s + "/models/SVM" + p + ".joblib")
+                print("Finished training:", s)
 
-    def svm_training_with_adaBoost(self, all_data=True):
+        # save_time_data("SVM", "SVM", "train", sum(time_data) / len(time_data))
+
+    def svm_training_with_adaBoost(self, all_data=True, pca = False, ratio = "10"):
+        p = "" if pca == False else "_pca"
         time_data = []
         print("----------------- Performing Adaboost Training ------------------")
         # Adaboost with the best estimator from grid search (SVC estimator) sucks
@@ -72,28 +82,38 @@ class SVM_Model:
         # maybe just pass in adaboost with just SVM alone
         for s in self.subjects:
 
-            X_train, Y_train = get_train_data(s, True)
+            X_train, Y_train = get_train_data(s, all_data, pca, ratio)
             svm_clf = SVC(probability=True, gamma="auto", decision_function_shape="ovo")
-            ada_clf = AdaBoostClassifier(svm_clf, n_estimators=100)
+            ada_clf = AdaBoostClassifier(svm_clf, n_estimators=10)
 
             start_time = perf_counter()
             ada_clf.fit(X_train, Y_train)
             end_time = perf_counter()
 
-            directoryExist(MODELS_SVM + s)
-            total_time = end_time - start_time
-            time_data.append(total_time)
-            dump(ada_clf, MODELS_SVM + s + "/Adaboost_SVM.joblib")
-            print("finished:", s)
+            if all_data:
+                directoryExist(MODELS_SVM_ALL+ s)
+                total_time = end_time - start_time
+                time_data.append(total_time)
+                dump(ada_clf, MODELS_SVM_ALL + s + "/models/Adaboost_SVM" + p + ".joblib")
+                print("finished:", s)
 
-        save_time_data("SVM", "Adaboost_SVM", "train", sum(time_data) / len(time_data))
+            else:
+                directoryExist(MODELS_SVM_BAL+ s)
+                total_time = end_time - start_time
+                time_data.append(total_time)
+                dump(ada_clf, MODELS_SVM_BAL + ratio + "/" + s + "/models/Adaboost_SVM" + p + ".joblib")
+                print("finished:", s)
 
-    def svm_training_with_Bagging(self, all_data=True):
+        # save_time_data("SVM", "Adaboost_SVM", "train", sum(time_data) / len(time_data))
+
+
+    def svm_training_with_Bagging(self, all_data=True, pca = False, ratio = "10"):
+        p = "" if pca == False else "_pca"
         time_data = []
         print("----------------- Performing Bagging Training ------------------")
 
         for s in self.subjects:
-            X_train, Y_train = get_train_data(s, True)
+            X_train, Y_train = get_train_data(s, all_data, pca, ratio)
             sv_clf = SVC(probability=True, gamma="auto", decision_function_shape="ovo")
             bag_clf = BaggingClassifier(sv_clf, n_estimators=100)
 
@@ -101,16 +121,29 @@ class SVM_Model:
             bag_clf.fit(X_train, Y_train)
             end_time = perf_counter()
 
-            directoryExist(MODELS_SVM + s)
-            total_time = end_time - start_time
-            time_data.append(total_time)
-            dump(bag_clf, MODELS_SVM + s + "/Bagging_SVM.joblib")
-            print("Finished subject", s)
+            if all_data:
+                directoryExist(MODELS_SVM_ALL + s)
+                total_time = end_time - start_time
+                time_data.append(total_time)
+                dump(bag_clf, MODELS_SVM_ALL + s + "/Bagging_SVM" + p + ".joblib")
+                print("Finished subject", s)
 
-        save_time_data("SVM", "Bagging_SVM", "train", sum(time_data) / len(time_data))
+            else:
+                directoryExist(MODELS_SVM_BAL + s)
+                total_time = end_time - start_time
+                time_data.append(total_time)
+                dump(bag_clf, MODELS_SVM_BAL + ratio + "/" + s + "/Bagging_SVM" + p + ".joblib")
+                print("Finished subject", s)
+
+        # save_time_data("SVM", "Bagging_SVM", "train", sum(time_data) / len(time_data))
 
 
 if __name__ == "__main__":
     SVM = SVM_Model()
-    SVM.startTraining(True, True, True)
-    SVM.startTesting()
+    ratios = [10, 20, 30, 40, 60, 70, 80, 90]
+    for r in ratios:
+        SVM.startTraining(True, True, True, True, True, ratio = str(r), pca = True)
+        SVM.startTesting(pca = True, all_data = False, ratio = str(r))
+    # SVM.startTraining(False, True, True,True)
+
+   
