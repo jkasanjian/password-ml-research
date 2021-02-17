@@ -28,19 +28,21 @@ class KNN_Model:
     def __init__(self):
         _, self.subjects = read_data()
 
-    def startTraining(self, reg=True, ada=False, Bagging=False, pca = False, ratio = "10"):
+    def startTraining(self, reg=True, ada=False, Bagging=False, all_data = False, pca = False, ratio = "10"):
         print("\n\n\n--------------TRAINING KNN--------------\n")
         if reg:
-            self.knn_training(pca = pca, ratio= ratio, all_data = False)
+            self.knn_training(pca = pca, ratio= ratio, all_data = all_data)
         if ada:
-            self.knn_training_with_adaBoost(pca= pca, ratio= ratio, all_data = False)
+            self.knn_training_with_adaBoost(pca= pca, ratio= ratio, all_data = all_data)
         if Bagging:
-            self.knn_training_with_Bagging(pca = pca, ratio= ratio, all_data = False)
+            self.knn_training_with_Bagging(pca = pca, ratio= ratio, all_data = all_data)
 
     def startTesting(self,pca =False, all_data = False, ratio = "10"):
-        model_names = ["KNN", "Bagging_KNN", "Adaboost_KNN"]
+        model_names = ["KNN","Bagging_KNN", "Adaboost_KNN"]
         for model in model_names:
             get_results(self.subjects, model, "KNN",pca, all_data, ratio = ratio )
+
+    
 
     def knn_training(self, all_data=True, pca = False, ratio = "10"):
         # Calculates and saves the best hyperparameters for each subject's KNN model
@@ -53,7 +55,7 @@ class KNN_Model:
         hyperparameters = dict(leaf_size=leaf_size, n_neighbors=n_neighbors, p=p)
 
         for s in self.subjects:
-            X_train, Y_train = get_train_data(s, all_data,pca, ratio)
+            X_train, Y_train = get_train_data(s, all_data = all_data ,pca = pca , ratio = ratio)
             knn_clf = KNeighborsClassifier(algorithm="brute", metric="minkowski")
             clf = GridSearchCV(knn_clf, hyperparameters, scoring="f1", n_jobs=-1)
 
@@ -69,7 +71,7 @@ class KNN_Model:
                 dump(clf, MODELS_KNN_ALL + s + "/models/KNN" + p + ".joblib")
 
             else:
-                directoryExist(MODELS_KNN_BAL + s)
+                directoryExist(MODELS_KNN_BAL + ratio + "/" + s + "/models")
                 total_time = end_time - start_time
                 time_data.append(total_time)
                 print("Finished training:", s)
@@ -83,7 +85,7 @@ class KNN_Model:
 
 
         for s in self.subjects:
-            X_train, Y_train = get_train_data(s, all_data,pca, ratio )
+            X_train, Y_train = get_train_data(s, all_data = all_data,pca = pca, ratio = ratio )
             ab_clf = AdaBoostClassifier(
                 KNeighborsClassifier(algorithm="brute", metric="minkowski")
             )
@@ -101,7 +103,7 @@ class KNN_Model:
                 dump(ab_clf, MODELS_KNN_ALL + s + "/models/Adaboost_KNN " + p + ".joblib")
             
             else:
-                directoryExist(MODELS_KNN_BAL + s)
+                directoryExist(MODELS_KNN_BAL + ratio + "/" + s + "/models")
                 total_time = end_time - start_time
                 time_data.append(total_time)
                 print("Finished training:", s)
@@ -115,7 +117,7 @@ class KNN_Model:
     
 
         for s in self.subjects:
-            X_train, Y_train = get_train_data(s, all_data,pca, ratio)
+            X_train, Y_train = get_train_data(s, all_data = all_data, pca = pca, ratio = ratio)
             bagging_clf = BaggingClassifier(
                 KNeighborsClassifier(algorithm="brute", metric="minkowski")
             )
@@ -132,7 +134,7 @@ class KNN_Model:
                 dump(bagging_clf, MODELS_KNN_ALL+ s + "/models/Bagging_KNN" + p + ".joblib")
             
             else:
-                directoryExist(MODELS_KNN_BAL + s)
+                directoryExist(MODELS_KNN_BAL + ratio + "/" + s + "/models")
                 total_time = end_time - start_time
                 time_data.append(total_time)
                 print("Finished training:", s)
@@ -143,5 +145,16 @@ class KNN_Model:
 
 if __name__ == "__main__":
     KNN = KNN_Model()
-    KNN.startTraining(True, True, True)
+    ratios = [10,20,30,40,60,70,80,90]
+    for r in ratios:
+        
+        KNN.startTraining(False, True, True, all_data = False, ratio = str(r), pca = False)
+        KNN.startTesting (all_data = False, ratio = str(r), pca = False)
+
+        KNN.startTraining(False, True, True, all_data = False, ratio = str(r), pca = True)
+        KNN.startTesting (all_data = False, ratio = str(r), pca = True)
+
+    KNN.startTraining(False, True, True, all_data = True, ratio = str(r), pca = False)
+    KNN.startTesting (all_data = True, ratio = str(r), pca = True)
+    
     # KNN.startTesting(pca = True)

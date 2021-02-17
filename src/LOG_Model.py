@@ -19,7 +19,7 @@ from time import perf_counter
 
 
 DATA_SPLIT = "data/split/"
-MODELS_LOG_ALL = "/models/all_data/"
+MODELS_LOG_ALL = "./models/all_data/"
 MODELS_LOG_BAL = "./models/pos-"
 
 
@@ -28,16 +28,16 @@ class LOG_Model:
     def __init__(self):
         _, self.subjects = read_data()
 
-    def startTraining(self, grid=True, logit=False, ada=False, Bagging=False, pca = False, ratio = "10"):
+    def startTraining(self, grid=True, logit=False, ada=False, Bagging=False, all_data = False, pca = False, ratio = "10"):
         print("\n\n\n--------------TRAINING LOG--------------\n")
         if grid:
-            self.log_training_gridSearch(pca = pca, ratio= ratio, all_data = False)
+            self.log_training_gridSearch(pca = pca, ratio= ratio, all_data = all_data)
         if logit:
-            self.log_training_with_LogitBoost(pca = pca, ratio= ratio, all_data = False)
+            self.log_training_with_LogitBoost(pca = pca, ratio= ratio, all_data = all_data)
         if ada:
-            self.log_training_with_Adaboost(pca = pca, ratio = ratio, all_data = False)
+            self.log_training_with_Adaboost(pca = pca, ratio = ratio, all_data = all_data)
         if Bagging:
-            self.log_training_with_Bagging(pca = pca,ratio = ratio, all_data = False)
+            self.log_training_with_Bagging(pca = pca,ratio = ratio, all_data = all_data)
 
     def startTesting(self,pca = False,all_data = False, ratio = "10"):
         model_names = ["Adaboost_LOG", "Bagging_LOG","LBoost_LOG"]
@@ -137,7 +137,7 @@ class LOG_Model:
             X_train = X_train.astype(np.float)
             Y_train = Y_train.astype(np.float)
             lb_clf = LogitBoost(n_estimators=200, bootstrap=True)
-
+            print(X_train.shape)
             start_time = perf_counter()
             lb_clf.fit(X_train, Y_train)
             end_time = perf_counter()
@@ -195,13 +195,18 @@ class LOG_Model:
 
 if __name__ == "__main__":
     LOG = LOG_Model()
-    ratios = [10,20,30,40,60,70,80,90]
     # for r in ratios:
     #     LOG.startTraining(False, True, True, True, ratio = str(r), pca = True)
     #     LOG.startTesting (all_data = False, ratio = str(r), pca = True)
 
-
-    for r in ratios:
+    ratios = [10,20,30,40,60,70,80,90]
+    # for r in ratios:
         
-        LOG.startTraining(False, True, True, True, ratio = str(r), pca = False)
-        LOG.startTesting (all_data = False, ratio = str(r), pca = False)
+    #     LOG.startTraining(True, True, True, True, ratio = str(r), pca = True)
+    #     LOG.startTesting (all_data = True, ratio = str(r), pca = True)
+
+    #     LOG.startTraining(True, True, True, True, ratio = str(r), pca = True)
+    #     LOG.startTesting (all_data = False, ratio = str(r), pca = True)
+
+    # LOG.startTraining(False, True, True, True, pca = True, all_data = True)
+    LOG.startTesting (all_data = True, pca = True)

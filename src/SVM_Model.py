@@ -22,14 +22,14 @@ class SVM_Model:
     def __init__(self, balanced=False):
         _, self.subjects = read_data()
 
-    def startTraining(self, reg=True, ada=False, Bagging=False, pca = False, ratio = "10"):
+    def startTraining(self, reg=True, ada=False, Bagging=False, pca = False, ratio = "10" , all_data = False):
         print("\n\n\n--------------TRAINING SVM--------------\n")
         if reg:
-            self.svm_training(pca = pca, ratio = ratio, all_data = False)
+            self.svm_training(pca = pca, ratio = ratio, all_data = all_data)
         if ada:
-            self.svm_training_with_adaBoost(pca = pca, ratio = ratio, all_data = False)
+            self.svm_training_with_adaBoost(pca = pca, ratio = ratio, all_data = all_data)
         if Bagging:
-            self.svm_training_with_Bagging(pca = pca, ratio = ratio, all_data = False)
+            self.svm_training_with_Bagging(pca = pca, ratio = ratio, all_data = all_data)
 
     def startTesting(self, pca = False, all_data = True, ratio = "10"):
         model_names = [ "Adaboost_SVM", "Bagging_SVM"]
@@ -142,8 +142,15 @@ if __name__ == "__main__":
     SVM = SVM_Model()
     ratios = [10, 20, 30, 40, 60, 70, 80, 90]
     for r in ratios:
-        SVM.startTraining(True, True, True, True, True, ratio = str(r), pca = True)
+        
+        SVM.startTraining(True, True, True, True, pca = False, ratio = str(r), all_data = False)
+        SVM.startTesting(pca = False, all_data = False, ratio = str(r))
+
+        SVM.startTraining(True, True, True, True, pca = True, ratio = str(r), all_data = False)
         SVM.startTesting(pca = True, all_data = False, ratio = str(r))
+
+    SVM.startTraining(True, True, True, True, pca = True, ratio = str(r), all_data = True)
+    SVM.startTesting(pca = True, all_data = True, ratio = str(r))
     # SVM.startTraining(False, True, True,True)
 
    

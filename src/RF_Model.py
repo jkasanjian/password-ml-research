@@ -29,17 +29,17 @@ class RF_Model:
     def __init__(self, balanced=False):
         _, self.subjects = read_data()
 
-    def startTraining(self, grid=False, ada=False, Bagging=False, pca = False, ratio = "10"):
+    def startTraining(self, grid=False, ada=False, Bagging=False, all_data = False, pca = False, ratio = "10"):
         print("\n\n\n--------------TRAINING RF--------------\n")
         if grid:
-            self.rf_training_with_gridSearch(pca = pca, ratio = ratio, all_data = False)
+            self.rf_training_with_gridSearch(pca = pca, ratio = ratio, all_data = all_data)
         if ada:
-            self.rf_training_with_adaBoost(pca = pca, ratio = ratio, all_data = False)
+            self.rf_training_with_adaBoost(pca = pca, ratio = ratio, all_data = all_data)
         if Bagging:
-            self.rf_training_with_Bagging(pca = pca, ratio = ratio, all_data = False)
+            self.rf_training_with_Bagging(pca = pca, ratio = ratio, all_data = all_data)
 
     def startTesting(self, pca = False, all_data = False, ratio = "10"):
-        model_names = ["Adaboost_RF", "Bagging_RF"]
+        model_names = ["RF","Adaboost_RF", "Bagging_RF"]
         for i in model_names:
             get_results(self.subjects, i, "RF",pca, all_data , ratio)
 
@@ -187,8 +187,14 @@ class RF_Model:
 
 if __name__ == "__main__":
     RF = RF_Model()
-    ratios = [40, 60, 70, 80, 90]
+    ratios = [20,30,40, 60, 70, 80, 90]
     for r in ratios:
         print("Starting training for ratio-",r)
-        RF.startTraining(False, True, True, True, ratio = str(r))
+        RF.startTraining(True, True, True, True, pca = True, ratio = str(r), all_data = False)
         RF.startTesting(pca = True, all_data = False, ratio = str(r))
+
+        RF.startTraining(True, True, True, True, pca = False, ratio = str(r), all_data = False)
+        RF.startTesting(pca = False, all_data = False, ratio = str(r))
+
+    RF.startTraining(True, True, True, True, pca = False, ratio = str(r), all_data = False)
+    RF.startTesting(pca = True, all_data = True, ratio = str(r))

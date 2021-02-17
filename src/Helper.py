@@ -55,7 +55,7 @@ def get_test_data(subject, all_data,pca,ratio = "10"):
     that is classed-balanced. if false, returns test data with
     the same class proportions as the entire dataset"""
 
-    if all_data:
+    if all_data and not pca:
         path = "data/partitions/all_data/"
         x_test = np.load(path + subject + "/x_test.npy")
         y_test = np.load(path + subject + "/y_test.npy")
@@ -89,7 +89,7 @@ def get_train_data(subject, all_data,pca,ratio = "10"):
     that is classed-balanced. if false, returns train data with
     the same class proportions as the entire dataset"""
     
-    if all_data:
+    if all_data and not pca:
         path = "data/partitions/all_data/"
         x_test = np.load(path + subject + "/x_train.npy")
         y_test = np.load(path + subject + "/y_train.npy")
@@ -141,13 +141,15 @@ def get_results(subjects, model_name, model_type,pca,all_data,ratio):
             X_test, Y_test = get_test_data(s, True, pca)
             path = "./models/all_data/" + s + "/graphs/"
             directoryExist(path)
-            path += model_name + p + "_PNG/"
+            path += model_name + p + "_PNG"
             
         else:
             X_test, Y_test = get_test_data(s, False, pca, ratio = ratio)
             path = "./models/pos-" + ratio + "/" + s + "/graphs/"
             directoryExist(path)
             path += model_name + p + "_PNG"
+            
+            
 
         model = load_model(model_name, s, pca = pca, all_data = all_data, ratio = ratio)
         start_time = perf_counter()
@@ -235,8 +237,8 @@ def get_results(subjects, model_name, model_type,pca,all_data,ratio):
     with open(RESULT_JSON, "w") as outfile:
         json.dump(results_data, outfile)
 
-    # printResults(results)
-    # print("Results saved")
+    printResults(results)
+    print("Results saved")
 
 
         
