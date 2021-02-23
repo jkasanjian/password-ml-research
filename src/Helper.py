@@ -141,16 +141,15 @@ def get_results(subjects, model_name, model_type,pca,all_data,ratio):
             X_test, Y_test = get_test_data(s, True, pca)
             path = "./models/all_data/" + s + "/graphs/"
             directoryExist(path)
-            path += model_name + p + "_PNG"
+            
             
         else:
             X_test, Y_test = get_test_data(s, False, pca, ratio = ratio)
             path = "./models/pos-" + ratio + "/" + s + "/graphs/"
             directoryExist(path)
-            path += model_name + p + "_PNG"
-            
-            
+        
 
+        path += model_name + p + "_PNG"            
         model = load_model(model_name, s, pca = pca, all_data = all_data, ratio = ratio)
         start_time = perf_counter()
         Y_pred = model.predict(X_test)

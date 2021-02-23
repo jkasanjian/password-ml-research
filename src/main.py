@@ -14,46 +14,55 @@ if __name__ == "__main__":
 
     for r in ratios:
         
-        LOG.startTraining(True, True, True, True, ratio = str(r), pca = True)
-        LOG.startTesting (all_data = True, ratio = str(r), pca = True)
+        """Trains with different positive ratios for datasets exposed an unexposed to PCA"""
 
-        LOG.startTraining(True, True, True, True, ratio = str(r), pca = True)
-        LOG.startTesting (all_data = False, ratio = str(r), pca = True)
+        LOG.startTraining(grid = True, logit = True, ada = True, all_data = False, ratio = str(r), pca = True)
+        LOG.startTesting (pca = True, all_data = False, ratio = str(r))
 
-    LOG.startTraining(True, True, True, True, pca = True, all_data = True)
+        LOG.startTraining(grid = True, logit = True, ada = True, all_data = False, ratio = str(r), pca = True)
+        LOG.startTesting (pca = False, all_data = False, ratio = str(r))
+
+    LOG.startTraining(grid =True, logit  = True, ada = True, all_data = True, pca = True)
     LOG.startTesting (all_data = True, pca = True)
 
     for r in ratios:
 
-        RF.startTraining(True, True, True, True, pca = True, ratio = str(r), all_data = False)
+        """Trains with different positive ratios for datasets exposed an unexposed to PCA"""
+
+        RF.startTraining(grid = True, ada = True, bagging = True, all_data = False, pca = True, ratio = str(r))
         RF.startTesting(pca = True, all_data = False, ratio = str(r))
 
-        RF.startTraining(True, True, True, True, pca = False, ratio = str(r), all_data = False)
+        RF.startTraining(grid = True, ada = True, bagging = True, all_data = False, pca = False, ratio = str(r))
         RF.startTesting(pca = False, all_data = False, ratio = str(r))
 
-    RF.startTraining(True, True, True, True, pca = False, ratio = str(r), all_data = False)
+    RF.startTraining(grid = True, ada = True, bagging = True, all_data = True, pca = True, ratio = str(r))
     RF.startTesting(pca = True, all_data = True, ratio = str(r))
 
     for r in ratios:
 
-        KNN.startTraining(True, True, True, all_data = False, ratio = str(r), pca = False)
-        KNN.startTesting (all_data = False, ratio = str(r), pca = False)
+        """Trains with different positive ratios for datasets exposed an unexposed to PCA"""
 
-        KNN.startTraining(True, True, True, all_data = False, ratio = str(r), pca = True)
-        KNN.startTesting (all_data = False, ratio = str(r), pca = True)
+        KNN.startTraining(grid = True, ada = True, bagging = True, all_data = False, ratio = str(r), pca = True)
+        KNN.startTesting (pca = True, all_data = False, ratio = str(r))
 
-    KNN.startTraining(True, True, True, all_data = True, ratio = str(r), pca = False)
+        KNN.startTraining(grid = True, ada = True, bagging = True, all_data = False, ratio = str(r), pca = False)
+        KNN.startTesting (pca = False, all_data = False, ratio = str(r))
+
+    KNN.startTraining(grid = True, ada = True, bagging = True, all_data = True, ratio = str(r), pca = True)
     KNN.startTesting (all_data = True, ratio = str(r), pca = True)
 
     for r in ratios:
         
-        SVM.startTraining(True, True, True, True, pca = False, ratio = str(r), all_data = False)
-        SVM.startTesting(pca = False, all_data = False, ratio = str(r))
+        """Trains with different positive ratios for datasets exposed an unexposed to PCA"""
 
-        SVM.startTraining(True, True, True, True, pca = True, ratio = str(r), all_data = False)
+        
+        SVM.startTraining(grid = True, ada = True, bagging = True, ratio = str(r), all_data = False, pca = True)
         SVM.startTesting(pca = True, all_data = False, ratio = str(r))
 
-    SVM.startTraining(True, True, True, True, pca = True, ratio = str(r), all_data = True)
+        SVM.startTraining(grid = True, ada = True, bagging = True, ratio = str(r), all_data = False, pca = False)
+        SVM.startTesting(pca = False, all_data = False, ratio = str(r))
+
+    SVM.startTraining(grid = True, ada = True, bagging = True, pca = True, ratio = str(r), all_data = True)
     SVM.startTesting(pca = True, all_data = True, ratio = str(r))
 
     

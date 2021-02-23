@@ -28,9 +28,9 @@ class KNN_Model:
     def __init__(self):
         _, self.subjects = read_data()
 
-    def startTraining(self, reg=True, ada=False, Bagging=False, all_data = False, pca = False, ratio = "10"):
+    def startTraining(self, grid=True, ada=False, Bagging=False, all_data = False, pca = False, ratio = "10"):
         print("\n\n\n--------------TRAINING KNN--------------\n")
-        if reg:
+        if grid:
             self.knn_training(pca = pca, ratio= ratio, all_data = all_data)
         if ada:
             self.knn_training_with_adaBoost(pca= pca, ratio= ratio, all_data = all_data)
