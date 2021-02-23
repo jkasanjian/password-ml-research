@@ -1,5 +1,5 @@
 {
-    "model" : {
+    "model_group" : {
         "model_variation" : {
             "pca_on" : {
                 "FAR mean" : 0,
