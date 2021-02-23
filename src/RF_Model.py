@@ -89,7 +89,8 @@ class RF_Model:
                 dump(clf, MODELS_RF_BAL + ratio + "/" + s + "/models/RF" + p + ".joblib")
                 print("Finished training:", s)
 
-        # save_time_data("RF", "RF", "train", sum(time_data) / len(time_data))
+        p_res = "pca_on" if pca == True else "pca_off"
+        save_time_data("RF", "RF_grid", p_res, "train", sum(time_data) / len(time_data))
 
     def rf_training_with_adaBoost(self, all_data=True,pca = False, ratio="10"):
         time_data = []
@@ -125,8 +126,8 @@ class RF_Model:
                 print(s, "Finished")
 
 
-
-        # save_time_data("RF", "Adaboost_RF", "train", sum(time_data) / len(time_data))
+        p_res = "pca_on" if pca == True else "pca_off"
+        save_time_data("RF", "Adaboost_RF", p_res, "train", sum(time_data) / len(time_data))
 
     def rf_training_with_Bagging(self, all_data=True,pca = False, ratio = "10"):
         time_data = []
@@ -165,8 +166,8 @@ class RF_Model:
                 print("Finished training:", s)
                 
             
-
-        # save_time_data("RF", "Bagging_RF", "train", sum(time_data) / len(time_data))
+        p_res = "pca_on" if pca == True else "pca_off"
+        save_time_data("RF", "Bagging_RF", p_res, "train", sum(time_data) / len(time_data))
 
     # TODO finish implementing visual for each users tree
 

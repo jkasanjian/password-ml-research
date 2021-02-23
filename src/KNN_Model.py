@@ -77,7 +77,8 @@ class KNN_Model:
                 print("Finished training:", s)
                 dump(clf, MODELS_KNN_BAL + ratio + "/" + s + "/models/KNN " + p + ".joblib")
 
-        # save_time_data("KNN", "KNN", "train", sum(time_data) / len(time_data))
+        p_res = "pca_on" if pca == True else "pca_off"
+        save_time_data("KNN", "KNN_grid", "train", sum(time_data) / len(time_data))
 
     def knn_training_with_adaBoost(self, all_data=True, pca = False, ratio = "10"):
         p = "" if pca == False else "_pca"
@@ -109,7 +110,8 @@ class KNN_Model:
                 print("Finished training:", s)
                 dump(ab_clf, MODELS_KNN_BAL + ratio + "/" + s + "/models/Adaboost_KNN " + p + ".joblib")
 
-        save_time_data("KNN", "Adaboost_KNN", "train", sum(time_data) / len(time_data))
+        p_res = "pca_on" if pca == True else "pca_off"
+        save_time_data("KNN", "Adaboost_KNN", p_res, "train", sum(time_data) / len(time_data))
 
     def knn_training_with_Bagging(self, all_data=True, pca = False, ratio = "10"):
         p = "" if pca == False else "_pca"
@@ -140,7 +142,8 @@ class KNN_Model:
                 print("Finished training:", s)
                 dump(bagging_clf, MODELS_KNN_BAL+ ratio + "/" + s + "/models/Bagging_KNN" + p + ".joblib")
 
-        # save_time_data("KNN", "Bagging_KNN", "train", sum(time_data) / len(time_data))
+        p_res = "pca_on" if pca == True else "pca_off"
+        save_time_data("KNN", "Bagging_KNN", p_res, "train", sum(time_data) / len(time_data))
 
 
 if __name__ == "__main__":

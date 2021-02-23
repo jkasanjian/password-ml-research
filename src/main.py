@@ -64,5 +64,5 @@ if __name__ == "__main__":
 
     SVM.startTraining(grid = True, ada = True, bagging = True, pca = True, ratio = str(r), all_data = True)
     SVM.startTesting(pca = True, all_data = True, ratio = str(r))
-
+        
     

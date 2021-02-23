@@ -70,7 +70,8 @@ class SVM_Model:
                 dump(clf, MODELS_SVM_BAL + ratio + "/" + s + "/models/SVM" + p + ".joblib")
                 print("Finished training:", s)
 
-        # save_time_data("SVM", "SVM", "train", sum(time_data) / len(time_data))
+        p_res = "pca_on" if pca == True else "pca_off"
+        save_time_data("SVM", "SVM_grid", p_res, "train", sum(time_data) / len(time_data))
 
     def svm_training_with_adaBoost(self, all_data=True, pca = False, ratio = "10"):
         p = "" if pca == False else "_pca"
@@ -104,7 +105,8 @@ class SVM_Model:
                 dump(ada_clf, MODELS_SVM_BAL + ratio + "/" + s + "/models/Adaboost_SVM" + p + ".joblib")
                 print("finished:", s)
 
-        # save_time_data("SVM", "Adaboost_SVM", "train", sum(time_data) / len(time_data))
+        p_res = "pca_on" if pca == True else "pca_off"
+        save_time_data("SVM", "Adaboost_SVM", p_res, "train", sum(time_data) / len(time_data))
 
 
     def svm_training_with_Bagging(self, all_data=True, pca = False, ratio = "10"):
@@ -135,7 +137,8 @@ class SVM_Model:
                 dump(bag_clf, MODELS_SVM_BAL + ratio + "/" + s + "/Bagging_SVM" + p + ".joblib")
                 print("Finished subject", s)
 
-        # save_time_data("SVM", "Bagging_SVM", "train", sum(time_data) / len(time_data))
+        p_res = "pca_on" if pca == True else "pca_off"
+        save_time_data("SVM", "Bagging_SVM", p_res, "train", sum(time_data) / len(time_data))
 
 
 if __name__ == "__main__":

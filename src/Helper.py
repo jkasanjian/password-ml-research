@@ -19,7 +19,7 @@ def read_data():
     return data, subjects
 
 
-def save_time_data(base_model, model_variation, train_or_test, avg_time):
+def save_time_data(base_model, model_variation, pca_status, train_or_test, avg_time):
     with open(RESULT_JSON) as json_file:
         results_data = json.load(json_file)
 
@@ -28,7 +28,7 @@ def save_time_data(base_model, model_variation, train_or_test, avg_time):
     else:
         last_key = "total test time"
 
-    results_data[base_model + "_group"][model_variation][last_key] = avg_time
+    results_data[base_model + "_group"][model_variation][pca_status][last_key] = avg_time
 
     with open(RESULT_JSON, "w") as outfile:
         json.dump(results_data, outfile)

@@ -89,7 +89,8 @@ class LOG_Model:
                 dump(grid_clf, MODELS_LOG_BAL +  ratio + "/" + s + "/models/LOG" + p + ".joblib")
                 print("done", s)
 
-        # save_time_data("LOG", "LOG", "train", sum(time_data) / len(time_data))
+        p_res = "pca_on" if pca == True else "pca_off"
+        save_time_data("LOG", "LOG_grid", p_res, "train", sum(time_data) / len(time_data))
 
    
    
@@ -122,7 +123,8 @@ class LOG_Model:
                 dump(ab_clf, MODELS_LOG_BAL +  ratio + "/" + s + "/models/Adaboost_LOG" + p +".joblib")
                 print("done", s)
 
-        # save_time_data("LOG", "Adaboost_LOG", "train", sum(time_data) / len(time_data))
+        p_res = "pca_on" if pca == True else "pca_off"
+        save_time_data("LOG", "Adaboost_LOG", p_res, "train", sum(time_data) / len(time_data))
 
     def log_training_with_LogitBoost(self, all_data = False, pca = False, ratio = "10"):
         print(all_data,pca)
@@ -156,7 +158,8 @@ class LOG_Model:
                 dump(lb_clf, MODELS_LOG_BAL +  ratio + "/" + s + "/models/LBoost_LOG" + p + ".joblib")
                 print("done", s)
 
-        # save_time_data("LOG", "LBoost_LOG", "train", sum(time_data) / len(time_data))
+        p_res = "pca_on" if pca == True else "pca_off"
+        save_time_data("LOG", "LBoost_LOG", p_res, "train", sum(time_data) / len(time_data))
 
     
     def log_training_with_Bagging(self, all_data = False, pca = False, ratio = "10"):
@@ -190,7 +193,8 @@ class LOG_Model:
                 dump(bagging_clf, MODELS_LOG_BAL + ratio + "/" + s + "/models/Bagging_LOG" + p + ".joblib")
                 print("done", s)
 
-        # save_time_data("LOG", "Bagging_LOG", "train", sum(time_data) / len(time_data))
+        p_res = "pca_on" if pca == True else "pca_off"
+        save_time_data("LOG", "Bagging_LOG", p_res, "train", sum(time_data) / len(time_data))
 
 
 if __name__ == "__main__":
