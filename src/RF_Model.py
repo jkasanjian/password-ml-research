@@ -29,13 +29,13 @@ class RF_Model:
     def __init__(self, balanced=False):
         _, self.subjects = read_data()
 
-    def startTraining(self, grid=False, ada=False, Bagging=False, all_data = False, pca = False, ratio = "10"):
+    def startTraining(self, grid=False, ada=False, bagging=False, all_data = False, pca = False, ratio = "10"):
         print("\n\n\n--------------TRAINING RF--------------\n")
         if grid:
             self.rf_training_with_gridSearch(pca = pca, ratio = ratio, all_data = all_data)
         if ada:
             self.rf_training_with_adaBoost(pca = pca, ratio = ratio, all_data = all_data)
-        if Bagging:
+        if bagging:
             self.rf_training_with_Bagging(pca = pca, ratio = ratio, all_data = all_data)
 
     def startTesting(self, pca = False, all_data = False, ratio = "10"):

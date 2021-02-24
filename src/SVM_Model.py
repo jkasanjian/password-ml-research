@@ -22,13 +22,13 @@ class SVM_Model:
     def __init__(self, balanced=False):
         _, self.subjects = read_data()
 
-    def startTraining(self, grid=True, ada=False, Bagging=False, pca = False, ratio = "10" , all_data = False):
+    def startTraining(self, grid=True, ada=False, bagging=False, pca = False, ratio = "10" , all_data = False):
         print("\n\n\n--------------TRAINING SVM--------------\n")
         if grid:
             self.svm_training(pca = pca, ratio = ratio, all_data = all_data)
         if ada:
             self.svm_training_with_adaBoost(pca = pca, ratio = ratio, all_data = all_data)
-        if Bagging:
+        if bagging:
             self.svm_training_with_Bagging(pca = pca, ratio = ratio, all_data = all_data)
 
     def startTesting(self, pca = False, all_data = True, ratio = "10"):

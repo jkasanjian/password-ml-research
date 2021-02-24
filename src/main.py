@@ -16,13 +16,13 @@ if __name__ == "__main__":
         
         """Trains with different positive ratios for datasets exposed an unexposed to PCA"""
 
-        LOG.startTraining(grid = True, logit = True, ada = True, all_data = False, ratio = str(r), pca = True)
+        # LOG.startTraining(grid = True, logit = True, ada = True, all_data = False, ratio = str(r), pca = True)
         # LOG.startTesting (pca = True, all_data = False, ratio = str(r))
 
-        LOG.startTraining(grid = True, logit = True, ada = True, all_data = False, ratio = str(r), pca = True)
+        # LOG.startTraining(grid = True, logit = True, ada = True, all_data = False, ratio = str(r), pca = True)
         # LOG.startTesting (pca = False, all_data = False, ratio = str(r))
 
-    LOG.startTraining(grid =True, logit  = True, ada = True, all_data = True, pca = True)
+    # LOG.startTraining(grid =True, logit  = True, ada = True, all_data = True, pca = True)
     # LOG.startTesting (all_data = True, pca = True)
 
     for r in ratios:
