@@ -1,68 +1,60 @@
-from KNN_Model import KNN_Model
-from LOG_Model import LOG_Model
-from RF_Model import RF_Model
-from SVM_Model import SVM_Model
+from algorithms.KNN_Model import KNN_Model
+from algorithms.LOG_Model import LOG_Model
+from algorithms.SVM_Model import SVM_Model
+from algorithms.RF_Model import RF_Model
+from constants import (
+    DATA_RATIOS,
+    MODEL_VARIATIONS,
+)
+
+
+
+def train_all_LOG():
+    print('Training all LOG')
+    LOG = LOG_Model()
+    for ratio in DATA_RATIOS:
+        for model_var in MODEL_VARIATIONS["LOG_group"]:
+            for pca in [True, False]:
+                LOG.startTraining(model_var, pca=pca, ratio=ratio)
+    print('Done training all LOG')
+
+
+def train_all_KNN():
+    print('Training all KNN')
+    KNN = KNN_Model()
+    for ratio in DATA_RATIOS:
+        for model_var in MODEL_VARIATIONS["KNN_group"]:
+            for pca in [True, False]:
+                KNN.startTraining(model_var, pca=pca, ratio=ratio)
+    print('Done training all KNN')
+
+
+def train_all_SVM():
+    print('Training all SVM')
+    SVM = SVM_Model()
+    for ratio in DATA_RATIOS:
+        for model_var in MODEL_VARIATIONS["SVM_group"]:
+            for pca in [True, False]:
+                SVM.startTraining(model_var, pca=pca, ratio=ratio)
+    print('Done training all SVM')
+
+
+def train_all_RF():
+    print('Training all RF')
+    RF = RF_Model()
+    for ratio in DATA_RATIOS:
+        for model_var in MODEL_VARIATIONS["RF_group"]:
+            for pca in [True, False]:
+                RF.startTraining(model_var, pca=pca, ratio=ratio)
+    print('Done training all LOG')
+
+
+def train_all_models():
+    train_all_LOG()
+    train_all_KNN()
+    train_all_SVM()
+    train_all_RF()
 
 
 if __name__ == "__main__":
-    SVM = SVM_Model()
-    KNN = KNN_Model()
-    LOG = LOG_Model()
-    RF = RF_Model()
-
-    ratios = [10,20,30,40,60,70,80,90]
-
-    for r in ratios:
-        
-        """Trains with different positive ratios for datasets exposed an unexposed to PCA"""
-
-        # LOG.startTraining(grid = True, logit = True, ada = True, all_data = False, ratio = str(r), pca = True)
-        # LOG.startTesting (pca = True, all_data = False, ratio = str(r))
-
-        # LOG.startTraining(grid = True, logit = True, ada = True, all_data = False, ratio = str(r), pca = True)
-        # LOG.startTesting (pca = False, all_data = False, ratio = str(r))
-
-    # LOG.startTraining(grid =True, logit  = True, ada = True, all_data = True, pca = True)
-    # LOG.startTesting (all_data = True, pca = True)
-
-    for r in ratios:
-
-        """Trains with different positive ratios for datasets exposed an unexposed to PCA"""
-
-        RF.startTraining(grid = True, ada = True, bagging = True, all_data = False, pca = True, ratio = str(r))
-        # RF.startTesting(pca = True, all_data = False, ratio = str(r))
-
-        RF.startTraining(grid = True, ada = True, bagging = True, all_data = False, pca = False, ratio = str(r))
-        # RF.startTesting(pca = False, all_data = False, ratio = str(r))
-
-    RF.startTraining(grid = True, ada = True, bagging = True, all_data = True, pca = True, ratio = str(r))
-    # RF.startTesting(pca = True, all_data = True, ratio = str(r))
-
-    for r in ratios:
-
-        """Trains with different positive ratios for datasets exposed an unexposed to PCA"""
-
-        KNN.startTraining(grid = True, ada = True, bagging = True, all_data = False, ratio = str(r), pca = True)
-        # KNN.startTesting (pca = True, all_data = False, ratio = str(r))
-
-        KNN.startTraining(grid = True, ada = True, bagging = True, all_data = False, ratio = str(r), pca = False)
-        # KNN.startTesting (pca = False, all_data = False, ratio = str(r))
-
-    KNN.startTraining(grid = True, ada = True, bagging = True, all_data = True, ratio = str(r), pca = True)
-    # KNN.startTesting (all_data = True, ratio = str(r), pca = True)
-
-    for r in ratios:
-        
-        """Trains with different positive ratios for datasets exposed an unexposed to PCA"""
-
-        
-        SVM.startTraining(grid = True, ada = True, bagging = True, ratio = str(r), all_data = False, pca = True)
-        # SVM.startTesting(pca = True, all_data = False, ratio = str(r))
-
-        SVM.startTraining(grid = True, ada = True, bagging = True, ratio = str(r), all_data = False, pca = False)
-        # SVM.startTesting(pca = False, all_data = False, ratio = str(r))
-
-    SVM.startTraining(grid = True, ada = True, bagging = True, pca = True, ratio = str(r), all_data = True)
-    # SVM.startTesting(pca = True, all_data = True, ratio = str(r))
-        
-    
+    train_all_models()
