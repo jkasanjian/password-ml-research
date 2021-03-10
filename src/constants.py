@@ -1,11 +1,17 @@
-# directories
+# DIRECTORIES
 DATA_JSON = "data/password_data.json"
 RESULT_JSON = "results/results.json"
 DATA_PARTITIONS_DIR = "data/partitions/"
 MODELS_DIR = "models/"
 
-# lists for iteration
 
+# VARIABLES
+
+# calculated size based on using all 400 samples for a 90% positive data subset
+SUBSET_SIZE = 444
+
+
+# LISTS
 DATA_RATIOS = [
     "all_data",
     "pos-10",
