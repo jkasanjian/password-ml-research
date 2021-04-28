@@ -1,1 +1,16 @@
 Errors encountered:
+
+--------TESTING LOG_Bagging pca_off balanced--------
+
+Results saved for  LOG_Bagging pca_off balanced
+
+
+
+--------TESTING LOG_Adaboost pca_on pos-10--------
+
+Traceback (most recent call last):
+  File "/home/josh/code/password-ml-research/src/tester.py", line 170, in <module>
+    get_results(subjects, model_group, model_var, pca, ratio)
+  File "/home/josh/code/password-ml-research/src/tester.py", line 81, in get_results
+    f1 = 2 * ((precision * recall) / (precision + recall))
+ZeroDivisionError: float division by zero
