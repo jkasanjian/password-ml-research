@@ -43,45 +43,31 @@ def directoryExist(name):
 
 
 # Need to fix for balanced and unbalanced
-def load_model(name, s, pca, all_data=True, ratio="10"):
+def load_model(name, s, pca, ratio):
     p = "_pca" if pca else ""
     """ Returns the corresponding model for a subject """
-    if all_data:
-        return load("models/all_data/" + s + "/models/" + name + p + ".joblib")
-
-    else:
-        return load("models/pos-" + ratio + "/" + s + "/models/" + name + p + ".joblib")
+    path = 'models/' + ratio + '/' + s + '/models/' + name + p + '.joblib'
+    return load(path)
 
 
-def get_test_data(subject, all_data, pca, ratio="10"):
+def get_test_data(subject, pca, ratio):
     """Returns the testing data partition for the given subject.
     is_balanced is a boolean field. if true, returns test data
     that is classed-balanced. if false, returns test data with
     the same class proportions as the entire dataset"""
 
-    if all_data and not pca:
-        path = "data/partitions/all_data/"
-        x_test = np.load(path + subject + "/x_test.npy")
-        y_test = np.load(path + subject + "/y_test.npy")
-        return x_test, y_test
-
-    elif all_data and pca:
-        path = "data/partitions/all_data/"
-        x_test = np.load(path + subject + "/x_pca_test.npy")
-        y_test = np.load(path + subject + "/y_pca_test.npy")
-        return x_test, y_test
-
-    elif all_data == False and pca == False:
-        path = "data/partitions/pos-" + ratio + "/"
-        x_test = np.load(path + subject + "/x_test.npy")
-        y_test = np.load(path + subject + "/y_test.npy")
-        return x_test, y_test
-
+    path = 'data/partitions/' + ratio + '/' + subject
+    if pca:
+        x_path = path + "/x_pca_test.npy"
+        y_path = path + "/y_pca_test.npy"
     else:
-        path = "data/partitions/pos-" + ratio + "/"
-        x_test = np.load(path + subject + "/x_pca_test.npy")
-        y_test = np.load(path + subject + "/y_pca_test.npy")
-        return x_test, y_test
+        x_path = path + "/x_test.npy"
+        y_path = path + "/y_test.npy"
+
+    x_test = np.load(x_path)
+    y_test = np.load(y_path)
+
+    return x_test.astype(np.float), y_test.astype(np.float)
 
 
 def get_train_data(subject, ratio, pca):
@@ -95,10 +81,10 @@ def get_train_data(subject, ratio, pca):
         x_path = path + "/x_train.npy"
         y_path = path + "/y_train.npy"
 
-    x_test = np.load(x_path)
-    y_test = np.load(y_path)
+    x_train = np.load(x_path)
+    y_train = np.load(y_path)
 
-    return x_test, y_test
+    return x_train.astype(np.float), y_train.astype(np.float)
 
 
 

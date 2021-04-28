@@ -14,6 +14,7 @@ from helper import (
     get_train_data,
     read_data,
     save_time_data,
+    directoryExist
 )
 from constants import MODELS_DIR
 
@@ -59,6 +60,9 @@ class KNN_Model:
             clf.fit(X_train, Y_train)
             end_time = perf_counter()
 
+            directoryExist(MODELS_DIR + ratio + "/" + s)
+            directoryExist(MODELS_DIR + ratio + "/" + s + '/models')
+
             fname = MODELS_DIR + ratio + "/" + s + "/models/KNN_Grid"
             if pca:
                 fname += "_pca"
@@ -93,6 +97,9 @@ class KNN_Model:
             ab_clf.fit(X_train, Y_train)
             end_time = perf_counter()
 
+            directoryExist(MODELS_DIR + ratio + "/" + s)
+            directoryExist(MODELS_DIR + ratio + "/" + s + '/models')
+
             fname = MODELS_DIR + ratio + "/" + s + "/models/KNN_Adaboost"
             if pca:
                 fname += "_pca"
@@ -123,6 +130,9 @@ class KNN_Model:
             start_time = perf_counter()
             bagging_clf.fit(X_train, Y_train)
             end_time = perf_counter()
+
+            directoryExist(MODELS_DIR + ratio + "/" + s)
+            directoryExist(MODELS_DIR + ratio + "/" + s + 'models')
 
             fname = MODELS_DIR + ratio + "/" + s + "/models/KNN_Bagging"
             if pca:

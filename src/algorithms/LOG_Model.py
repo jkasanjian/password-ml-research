@@ -12,6 +12,7 @@ from helper import (
     get_train_data,
     read_data,
     save_time_data,
+    directoryExist
 )
 from constants import MODELS_DIR
 
@@ -58,6 +59,9 @@ class LOG_Model:
             grid_clf.fit(X_train, Y_train)
             end_time = perf_counter()
 
+            directoryExist(MODELS_DIR + ratio + "/" + s)
+            directoryExist(MODELS_DIR + ratio + "/" + s + '/models')
+
             fname = MODELS_DIR + ratio + "/" + s + "/models/LOG_Grid"
             if pca:
                 fname += "_pca"
@@ -88,6 +92,9 @@ class LOG_Model:
             start_time = perf_counter()
             ab_clf.fit(X_train, Y_train)
             end_time = perf_counter()
+
+            directoryExist(MODELS_DIR + ratio + "/" + s)
+            directoryExist(MODELS_DIR + ratio + "/" + s + '/models')
 
             fname = MODELS_DIR + ratio + "/" + s + "/models/LOG_Adaboost"
             if pca:
@@ -120,6 +127,9 @@ class LOG_Model:
             lb_clf.fit(X_train, Y_train)
             end_time = perf_counter()
 
+            directoryExist(MODELS_DIR + ratio + "/" + s)
+            directoryExist(MODELS_DIR + ratio + "/" + s + '/models')
+
             fname = MODELS_DIR + ratio + "/" + s + "/models/LOG_LBoost"
             if pca:
                 fname += "_pca"
@@ -150,6 +160,9 @@ class LOG_Model:
             start_time = perf_counter()
             bagging_clf.fit(X_train, Y_train)
             end_time = perf_counter()
+
+            directoryExist(MODELS_DIR + ratio + "/" + s)
+            directoryExist(MODELS_DIR + ratio + "/" + s + '/models')
 
             fname = MODELS_DIR + ratio + "/" + s + "/models/LOG_Bagging"
             if pca:

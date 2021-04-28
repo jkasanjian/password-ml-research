@@ -5,15 +5,15 @@ DATA_PARTITIONS_DIR = "data/partitions/"
 MODELS_DIR = "models/"
 
 
-# VARIABLES
+# NUMBERS
 
 # calculated size based on using all 400 samples for a 90% positive data subset
 SUBSET_SIZE = 444
 
 
 # LISTS
+
 DATA_RATIOS = [
-    "all_data",
     "pos-10",
     "pos-20",
     "pos-30",
@@ -26,9 +26,18 @@ DATA_RATIOS = [
 ]
 
 MODEL_GROUPS = ["SVM_group", "RF_group", "KNN_group", "LOG_group"]
+MODEL_TYPES = ["LOG", "SVM", "KNN", "LOG"]
 MODEL_VARIATIONS = {
-    "SVM_group": ["SVM_Grid", "SVM_Adaboost", "SVM_Bagging"],
-    "RF_group": ["RF_Grid", "RF_Adaboost", "RF_Bagging"],
-    "KNN_group": ["KNN_Grid", "KNN_Adaboost", "KNN_Bagging"],
-    "LOG_group": ["LOG_Grid", "LOG_Adaboost", "LOG_LBoost", "LOG_Bagging"],
+    "SVM_group": ["SVM_Grid"],
+    "RF_group": ["RF_Grid"],
+    "KNN_group": ["KNN_Grid"],
+    "LOG_group": ["LOG_Grid"],
 }
+
+# MODEL_VARIATIONS = {
+#     "SVM_group": ["SVM_Adaboost", "SVM_Bagging"],
+#     "RF_group": ["RF_Adaboost", "RF_Bagging"],
+#     "KNN_group": ["KNN_Bagging"],
+#     "LOG_group": ["LOG_Adaboost", "LOG_LBoost", "LOG_Bagging"],
+# }
+

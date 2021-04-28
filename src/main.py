@@ -13,6 +13,8 @@ def train_all_LOG():
     print('Training all LOG')
     LOG = LOG_Model()
     for ratio in DATA_RATIOS:
+        if ratio == "all_data":
+            continue
         for model_var in MODEL_VARIATIONS["LOG_group"]:
             for pca in [True, False]:
                 LOG.startTraining(model_var, pca=pca, ratio=ratio)
@@ -57,6 +59,4 @@ def train_all_models():
 
 
 if __name__ == "__main__":
-    # train_all_models()
-    train_all_LOG()
-    train_all_SVM()
+    train_all_models()

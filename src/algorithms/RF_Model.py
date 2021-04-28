@@ -12,6 +12,7 @@ from helper import (
     get_train_data,
     read_data,
     save_time_data,
+    directoryExist
 )
 from constants import MODELS_DIR
 
@@ -64,6 +65,9 @@ class RF_Model:
             clf.fit(X_train, Y_train)
             end_time = perf_counter()
 
+            directoryExist(MODELS_DIR + ratio + "/" + s)
+            directoryExist(MODELS_DIR + ratio + "/" + s + '/models')
+
             fname = MODELS_DIR + ratio + "/" + s + "/models/RF_Grid"
             if pca:
                 fname += "_pca"
@@ -96,6 +100,9 @@ class RF_Model:
             start_time = perf_counter()
             ada_clf.fit(X_train, Y_train)
             end_time = perf_counter()
+
+            directoryExist(MODELS_DIR + ratio + "/" + s)
+            directoryExist(MODELS_DIR + ratio + "/" + s + '/models')
 
             fname = MODELS_DIR + ratio + "/" + s + "/models/RF_Adaboost"
             if pca:
@@ -131,6 +138,9 @@ class RF_Model:
             start_time = perf_counter()
             bagging_clf.fit(X_train, Y_train)
             end_time = perf_counter()
+
+            directoryExist(MODELS_DIR + ratio + "/" + s)
+            directoryExist(MODELS_DIR + ratio + "/" + s + '/models')
 
             fname = MODELS_DIR + ratio + "/" + s + "/models/RF_Bagging"
             if pca:
